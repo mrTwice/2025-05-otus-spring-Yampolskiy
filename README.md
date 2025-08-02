@@ -47,3 +47,10 @@
 18. Если несколько строк кода выполняют законченное действие, они должны быть **вынесены в отдельный метод**.
 
 19. Если один или несколько методов **не относятся напрямую к логике класса**, они должны быть вынесены в отдельный класс (например, сервис).
+
+### Данные правила подготовлены на основе следующих соглашений:
+
+- [Code Conventions for the Java Programming Language (Oracle)](https://www.oracle.com/technetwork/java/javase/documentation/codeconvtoc-136057.html)
+- [Maven Naming Conventions Guide](https://maven.apache.org/guides/mini/guide-naming-conventions.html)
+- [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html)
+- [Spring Framework Code Style Guidelines (GitHub Wiki)](https://github.com/spring-projects/spring-framework/wiki/Code-Style)
