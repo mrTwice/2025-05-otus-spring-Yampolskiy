@@ -1,25 +1,43 @@
 package ru.otus.hw.service;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ru.otus.hw.dao.QuestionDao;
 import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class TestServiceImplTest {
 
+    @Mock
     private IOService ioService;
+
+    @Mock
     private QuestionDao questionDao;
+
+    @InjectMocks
     private TestServiceImpl testService;
+
+    @Captor
+    private ArgumentCaptor<String> formatCaptor;
+
+    @Captor
+    private ArgumentCaptor<Object[]> argsCaptor;
 
     private static Stream<Arguments> questionSets() {
         return Stream.of(
@@ -58,22 +76,12 @@ class TestServiceImplTest {
     }
 
 
-    @BeforeEach
-    void setUp() {
-        ioService = mock(IOService.class);
-        questionDao = mock(QuestionDao.class);
-        testService = new TestServiceImpl(ioService, questionDao);
-    }
-
     @ParameterizedTest
     @MethodSource("questionSets")
     void executeTest_shouldPrintQuestions(List<Question> questions) {
         when(questionDao.findAll()).thenReturn(questions);
 
         testService.executeTest();
-
-        ArgumentCaptor<String> formatCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<Object[]> argsCaptor = ArgumentCaptor.forClass(Object[].class);
 
         verify(ioService, atLeast(1)).printFormattedLine(formatCaptor.capture(), argsCaptor.capture());
 
@@ -124,7 +132,7 @@ class TestServiceImplTest {
         ));
 
         doThrow(new RuntimeException("IO fail"))
-                .when(ioService).printFormattedLine("Please answer the questions below%n");
+                .when(ioService).printFormattedLine("Please answer the questions below");
 
         assertThrows(RuntimeException.class, () -> testService.executeTest());
     }
