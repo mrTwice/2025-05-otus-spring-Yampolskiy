@@ -15,14 +15,20 @@ import ru.otus.hw.models.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.Map;
+import java.util.List;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 @Repository
 @RequiredArgsConstructor
 public class JdbcBookRepository implements BookRepository {
 
     private final GenreRepository genreRepository;
+
     private final NamedParameterJdbcTemplate jdbc;
 
     @Override
@@ -38,7 +44,9 @@ public class JdbcBookRepository implements BookRepository {
             order by b.id
         """;
         Book book = jdbc.query(sql, Map.of("id", id), new BookResultSetExtractor());
-        if (book == null) return Optional.empty();
+        if (book == null) {
+            return Optional.empty();
+        }
 
         Set<Long> gIds = book.getGenres() == null ? Set.of()
                 : book.getGenres().stream().map(Genre::getId).collect(Collectors.toCollection(LinkedHashSet::new));
@@ -87,7 +95,9 @@ public class JdbcBookRepository implements BookRepository {
 
     private void mergeBooksInfo(List<Book> booksWithoutGenres, List<Genre> genres,
                                 List<BookGenreRelation> relations) {
-        if (booksWithoutGenres.isEmpty() || relations.isEmpty() || genres.isEmpty()) return;
+        if (booksWithoutGenres.isEmpty() || relations.isEmpty() || genres.isEmpty()) {
+            return;
+        }
 
         var byId = booksWithoutGenres.stream().collect(Collectors.toMap(Book::getId, b -> b));
         var genreById = genres.stream().collect(Collectors.toMap(Genre::getId, g -> g));
@@ -96,11 +106,17 @@ public class JdbcBookRepository implements BookRepository {
             var b = byId.get(rel.bookId());
             var g = genreById.get(rel.genreId());
             if (b != null && g != null) {
-                if (b.getGenres() == null) b.setGenres(new ArrayList<>());
+                if (b.getGenres() == null) {
+                    b.setGenres(new ArrayList<>());
+                }
                 b.getGenres().add(g);
             }
         }
-        booksWithoutGenres.forEach(b -> { if (b.getGenres() == null) b.setGenres(new ArrayList<>()); });
+        booksWithoutGenres.forEach(b -> {
+            if (b.getGenres() == null) {
+                b.setGenres(new ArrayList<>());
+            }
+        });
     }
 
     private Book insert(Book book) {
@@ -136,7 +152,9 @@ public class JdbcBookRepository implements BookRepository {
 
     private void batchInsertGenresRelationsFor(Book book) {
         var gs = book.getGenres();
-        if (gs == null || gs.isEmpty()) return;
+        if (gs == null || gs.isEmpty()) {
+            return;
+        }
 
         String sql = "insert into books_genres(book_id, genre_id) values(:bookId, :genreId)";
 
