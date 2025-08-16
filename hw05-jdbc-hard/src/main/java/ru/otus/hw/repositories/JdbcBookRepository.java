@@ -34,25 +34,19 @@ public class JdbcBookRepository implements BookRepository {
     @Override
     public Optional<Book> findById(long id) {
         String sql = """
-            select b.id as b_id, b.title,
-                   a.id as a_id, a.full_name as a_name,
-                   bg.genre_id as g_id
-            from books b
-            join authors a on a.id = b.author_id
-            left join books_genres bg on bg.book_id = b.id
-            where b.id = :id
-            order by b.id
-        """;
-        Book book = jdbc.query(sql, Map.of("id", id), new BookResultSetExtractor());
-        if (book == null) {
-            return Optional.empty();
-        }
+        select b.id as b_id, b.title,
+               a.id as a_id, a.full_name as a_name,
+               g.id as g_id, g.name as g_name
+        from books b
+        join authors a on a.id = b.author_id
+        left join books_genres bg on bg.book_id = b.id
+        left join genres g on g.id = bg.genre_id
+        where b.id = :id
+        order by b.id, g.name
+    """;
 
-        Set<Long> gIds = book.getGenres() == null ? Set.of()
-                : book.getGenres().stream().map(Genre::getId).collect(Collectors.toCollection(LinkedHashSet::new));
-        var genres = genreRepository.findAllByIds(gIds);
-        book.setGenres(genres);
-        return Optional.of(book);
+        Book book = jdbc.query(sql, Map.of("id", id), bookWithGenresExtractor());
+        return Optional.ofNullable(book);
     }
 
     @Override
@@ -86,6 +80,35 @@ public class JdbcBookRepository implements BookRepository {
             order by b.id
         """;
         return jdbc.query(sql, new BookRowMapper());
+    }
+
+    private ResultSetExtractor<Book> bookWithGenresExtractor() {
+        return rs -> {
+            Book book = null;
+            Set<Genre> genres = new LinkedHashSet<>();
+
+            while (rs.next()) {
+                if (book == null) {
+                    var author = new Author(rs.getLong("a_id"), rs.getString("a_name"));
+                    book = new Book(
+                            rs.getLong("b_id"),
+                            rs.getString("title"),
+                            author,
+                            new ArrayList<>()
+                    );
+                }
+
+                long gId = rs.getLong("g_id");
+                if (!rs.wasNull()) {
+                    genres.add(new Genre(gId, rs.getString("g_name")));
+                }
+            }
+
+            if (book != null) {
+                book.setGenres(new ArrayList<>(genres));
+            }
+            return book;
+        };
     }
 
     private List<BookGenreRelation> getAllGenreRelations() {
@@ -176,31 +199,6 @@ public class JdbcBookRepository implements BookRepository {
         public Book mapRow(ResultSet rs, int rowNum) throws SQLException {
             var author = new Author(rs.getLong("a_id"), rs.getString("a_name"));
             return new Book(rs.getLong("b_id"), rs.getString("title"), author, new ArrayList<>());
-        }
-    }
-
-    @SuppressWarnings("ClassCanBeRecord")
-    @RequiredArgsConstructor
-    private static class BookResultSetExtractor implements ResultSetExtractor<Book> {
-        @Override
-        public Book extractData(ResultSet rs) throws SQLException, DataAccessException {
-            Book book = null;
-            Set<Long> genreIds = new LinkedHashSet<>();
-            while (rs.next()) {
-                if (book == null) {
-                    var author = new Author(rs.getLong("a_id"), rs.getString("a_name"));
-                    book = new Book(rs.getLong("b_id"), rs.getString("title"), author, new ArrayList<>());
-                }
-                long gid = rs.getLong("g_id");
-                if (!rs.wasNull()) {
-                    genreIds.add(gid);
-                }
-            }
-            if (book != null) {
-                var stubGenres = genreIds.stream().map(id -> new Genre(id, null)).toList();
-                book.setGenres(new ArrayList<>(stubGenres));
-            }
-            return book;
         }
     }
 
