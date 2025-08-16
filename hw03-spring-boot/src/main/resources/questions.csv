@@ -2,3 +2,6 @@
 Is there life on Mars?;Science doesn't know this yet%true|Certainly. The red UFO is from Mars. And green is from Venus%false|Absolutely not%false
 How should resources be loaded form jar in Java?;ClassLoader#geResourceAsStream or ClassPathResource#getInputStream%true|ClassLoader#geResource#getFile + FileReader%false|Wingardium Leviosa%false
 Which option is a good way to handle the exception?;@SneakyThrow%false|e.printStackTrace()%false|Rethrow with wrapping in business exception (for example, QuestionReadException)%true|Ignoring exception%false
+What is the result of 3 * 3?;9%true|6%false|33%false
+What keyword is used to create a subclass in Java?;extends%true|implements%false|inherits%false
+Which HTTP status code means "Not Found"?;404%true|500%false|403%false
