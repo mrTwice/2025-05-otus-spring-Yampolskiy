@@ -10,13 +10,16 @@ import java.util.List;
 public class JpaCommentRepository extends AbstractJpaListCrudRepository<Comment, Long>
         implements CommentRepository {
 
+    private final EntityManager entityManager;
+
     public JpaCommentRepository(EntityManager em) {
         super(em, Comment.class);
+        this.entityManager = em;
     }
 
     @Override
     public List<Comment> findByBookId(long bookId) {
-        return em.createQuery(
+        return entityManager.createQuery(
                         "select c from Comment c " +
                                 "join fetch c.book b " +
                                 "where b.id = :bookId " +

@@ -8,11 +8,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public abstract class AbstractJpaListCrudRepository<T, ID> implements ListCrudRepository<T, ID> {
+public abstract class AbstractJpaListCrudRepository<T, I> implements ListCrudRepository<T, I> {
 
-    protected final EntityManager em;
+    private final EntityManager em;
+
     private final Class<T> entityClass;
+
     private final String entityName;
+
     private final PersistenceUnitUtil pu;
 
     protected AbstractJpaListCrudRepository(EntityManager em, Class<T> entityClass) {
@@ -28,20 +31,22 @@ public abstract class AbstractJpaListCrudRepository<T, ID> implements ListCrudRe
     }
 
     @Override
-    public List<T> findAllById(Collection<ID> ids) {
-        if (ids == null || ids.isEmpty()) return List.of();
+    public List<T> findAllById(Collection<I> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
         return em.createQuery("select e from " + entityName + " e where e.id in :ids", entityClass)
                 .setParameter("ids", ids)
                 .getResultList();
     }
 
     @Override
-    public Optional<T> findById(ID id) {
+    public Optional<T> findById(I id) {
         return Optional.ofNullable(em.find(entityClass, id));
     }
 
     @Override
-    public boolean existsById(ID id) {
+    public boolean existsById(I id) {
         return findById(id).isPresent();
     }
 
@@ -54,38 +59,54 @@ public abstract class AbstractJpaListCrudRepository<T, ID> implements ListCrudRe
     @Override
     public T save(T entity) {
         Object id = pu.getIdentifier(entity);
-        if (id == null) { em.persist(entity); return entity; }
+        if (id == null) {
+            em.persist(entity);
+            return entity;
+        }
         return em.merge(entity);
     }
 
     @Override
     public List<T> saveAll(Collection<T> entities) {
-        if (entities == null || entities.isEmpty()) return List.of();
+        if (entities == null || entities.isEmpty()) {
+            return List.of();
+        }
         return entities.stream().map(this::save).collect(Collectors.toList());
     }
 
     @Override
-    public void deleteById(ID id) {
+    public void deleteById(I id) {
         T ref = em.find(entityClass, id);
-        if (ref != null) em.remove(ref);
+        if (ref != null) {
+            em.remove(ref);
+        }
     }
 
     @Override
     public void delete(T entity) {
-        if (entity == null) return;
-        if (em.contains(entity)) em.remove(entity);
-        else em.remove(em.merge(entity));
+        if (entity == null) {
+            return;
+        }
+        if (em.contains(entity)) {
+            em.remove(entity);
+        } else {
+            em.remove(em.merge(entity));
+        }
     }
 
     @Override
-    public void deleteAllById(Collection<ID> ids) {
-        if (ids == null || ids.isEmpty()) return;
+    public void deleteAllById(Collection<I> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
         ids.forEach(this::deleteById);
     }
 
     @Override
     public void deleteAll(Collection<T> entities) {
-        if (entities == null || entities.isEmpty()) return;
+        if (entities == null || entities.isEmpty()) {
+            return;
+        }
         entities.forEach(this::delete);
     }
 
@@ -94,6 +115,11 @@ public abstract class AbstractJpaListCrudRepository<T, ID> implements ListCrudRe
         em.createQuery("delete from " + entityName + " e").executeUpdate();
     }
 
-    protected String getEntityName() { return entityName; }
-    protected Class<T> getEntityClass() { return entityClass; }
+    protected String getEntityName() {
+        return entityName;
+    }
+
+    protected Class<T> getEntityClass() {
+        return entityClass;
+    }
 }

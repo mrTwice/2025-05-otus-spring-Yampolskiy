@@ -21,7 +21,9 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 public class BookServiceImpl implements BookService {
 
     private final AuthorRepository authorRepository;
+
     private final GenreRepository genreRepository;
+
     private final BookRepository bookRepository;
 
     @Override

@@ -16,6 +16,7 @@ import java.util.Optional;
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
+
     private final BookRepository bookRepository;
 
     @Override
