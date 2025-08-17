@@ -5,8 +5,6 @@ import ru.otus.hw.models.Genre;
 import java.util.List;
 import java.util.Set;
 
-public interface GenreRepository {
-    List<Genre> findAll();
-
+public interface GenreRepository extends ListCrudRepository<Genre, Long> {
     List<Genre> findAllByIds(Set<Long> ids);
 }
