@@ -11,7 +11,7 @@ import java.util.Optional;
 public class JpaBookRepository extends AbstractJpaListCrudRepository<Book, Long>
         implements BookRepository {
 
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
     public JpaBookRepository(EntityManager em) {
         super(em, Book.class);
@@ -20,11 +20,9 @@ public class JpaBookRepository extends AbstractJpaListCrudRepository<Book, Long>
 
     @Override
     public List<Book> findAll() {
-        // автор и жанры подтягиваются одной пачкой; distinct убирает дубликаты
         return entityManager.createQuery(
                         "select distinct b from Book b " +
                                 "left join fetch b.author " +
-                                "left join fetch b.genres " +
                                 "order by b.id", Book.class)
                 .getResultList();
     }
