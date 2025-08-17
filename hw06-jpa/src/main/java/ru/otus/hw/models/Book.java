@@ -54,4 +54,10 @@ public class Book {
     )
     @BatchSize(size = 16)
     private List<Genre> genres = new ArrayList<>();
+
+    public Book(String title, Author author, List<Genre> genres) {
+        this.title = title;
+        this.author = author;
+        this.genres = genres;
+    }
 }

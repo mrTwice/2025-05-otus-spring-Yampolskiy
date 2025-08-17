@@ -46,6 +46,11 @@ public class Comment {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
+    public Comment(String text, Book book) {
+        this.text = text;
+        this.book = book;
+    }
+
     @PrePersist
     void onCreate() {
         if (createdAt == null) {
