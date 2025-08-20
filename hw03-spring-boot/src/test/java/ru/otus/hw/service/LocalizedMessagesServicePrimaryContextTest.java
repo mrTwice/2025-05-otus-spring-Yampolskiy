@@ -1,46 +1,41 @@
 package ru.otus.hw.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Bean;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import java.util.Locale;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import ru.otus.hw.config.LocaleConfig;
 
-import java.util.Locale;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.springframework.context.support.StaticMessageSource;
 
 @ExtendWith(SpringExtension.class)
-@Import({ LocalizedMessagesServiceImpl.class, LocalizedMessagesServicePrimaryContextTest.TestBeans.class })
+@Import(LocalizedMessagesServiceImpl.class)
+@ImportAutoConfiguration(MessageSourceAutoConfiguration.class)
+@TestPropertySource(properties = {
+        "spring.messages.basename=messages"
+})
 class LocalizedMessagesServicePrimaryContextTest {
 
     @Autowired
-    private LocalizedMessagesService service;
+    LocalizedMessagesService service;
 
-    @TestConfiguration(proxyBeanMethods = false)
-    static class TestBeans {
-        @Bean
-        LocalizedMessagesService nonPrimaryMessagesService() {
-            return (code, args) -> "NON_PRIMARY_" + code;
-        }
+    @MockitoBean
+    LocaleConfig localeConfig;
 
-        @Bean
-        LocaleConfig localeConfig() {
-            return () -> Locale.forLanguageTag("en-US");
-        }
+    @MockitoBean(name = "nonPrimaryMessagesService")
+    LocalizedMessagesService nonPrimary;
 
-        @Bean
-        MessageSource messageSource() {
-            StaticMessageSource sms = new StaticMessageSource();
-            sms.addMessage("greet", Locale.forLanguageTag("en-US"), "Hello, {0}");
-            return sms;
-        }
+    @BeforeEach
+    void setUp() {
+        given(localeConfig.getLocale()).willReturn(Locale.forLanguageTag("en-US"));
     }
 
     @Test
