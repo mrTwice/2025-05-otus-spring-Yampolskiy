@@ -27,8 +27,16 @@ class BookServiceIT {
     @Test
     void loadedBook_hasAccessibleAuthorAndGenres_outsideServiceTx() {
         var authorId = authorRepository.findAll().get(0).getId();
-        var genreIds = genreRepository.findAll().subList(0, 2).stream()
-                .map(Genre::getId).collect(java.util.stream.Collectors.toSet());
+
+        var allGenres = genreRepository.findAll();
+        org.assertj.core.api.Assertions.assertThat(allGenres)
+                .as("В тестовых данных должно быть минимум 2 жанра")
+                .hasSizeGreaterThanOrEqualTo(2);
+
+        var genreIds = allGenres.stream()
+                .map(Genre::getId)
+                .limit(2)
+                .collect(java.util.stream.Collectors.toSet());
 
         var saved = bookService.insert("IT-Book", authorId, genreIds);
 

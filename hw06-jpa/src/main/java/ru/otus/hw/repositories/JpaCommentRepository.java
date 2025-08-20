@@ -1,20 +1,22 @@
 package ru.otus.hw.repositories;
 
 import jakarta.persistence.EntityManager;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.otus.hw.models.Comment;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
-public class JpaCommentRepository extends AbstractJpaListCrudRepository<Comment, Long>
-        implements CommentRepository {
+@AllArgsConstructor
+public class JpaCommentRepository implements CommentRepository {
 
     private final EntityManager entityManager;
 
-    public JpaCommentRepository(EntityManager em) {
-        super(em, Comment.class);
-        this.entityManager = em;
+    @Override
+    public Optional<Comment> findById(long id) {
+        return Optional.ofNullable(entityManager.find(Comment.class, id));
     }
 
     @Override
@@ -26,5 +28,23 @@ public class JpaCommentRepository extends AbstractJpaListCrudRepository<Comment,
                                 "order by c.createdAt desc", Comment.class)
                 .setParameter("bookId", bookId)
                 .getResultList();
+    }
+
+    @Override
+    public Comment save(Comment comment) {
+        final Long id = comment.getId();
+        if (id == null || id == 0L) {
+            entityManager.persist(comment);
+            return comment;
+        }
+        return entityManager.merge(comment);
+    }
+
+    @Override
+    public void deleteById(long id) {
+        Comment ref = entityManager.find(Comment.class, id);
+        if (ref != null) {
+            entityManager.remove(ref);
+        }
     }
 }
