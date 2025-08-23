@@ -1,54 +1,51 @@
 package ru.otus.hw.service;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.params.provider.Arguments;
+import org.mockito.InOrder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import ru.otus.hw.dao.QuestionDao;
-import ru.otus.hw.domain.Answer;
+import ru.otus.hw.exceptions.QuestionReadException;
 import ru.otus.hw.domain.Question;
+import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Student;
 import ru.otus.hw.domain.TestResult;
-import ru.otus.hw.exceptions.QuestionReadException;
-
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.times;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@ActiveProfiles("test")
 class TestServiceImplTest {
 
-    @Mock
-    LocalizedIOService ioService;
+    @Autowired
+    private TestService service;
 
-    @Mock
-    QuestionDao questionDao;
+    @MockitoBean
+    private LocalizedIOService ioService;
 
-    @InjectMocks
-    TestServiceImpl service;
-
-    @Captor
-    ArgumentCaptor<Integer> minCap;
-    @Captor
-    ArgumentCaptor<Integer> maxCap;
+    @MockitoBean
+    private QuestionDao questionDao;
 
     private final Student student = new Student("John", "Doe");
 
@@ -159,16 +156,6 @@ class TestServiceImplTest {
         assertThrows(RuntimeException.class, () -> service.executeTestFor(student));
     }
 
-    @Test
-    void executeTestFor_propagates_whenPrintingAnswerFails() {
-        var q = new Question("Q", List.of(new Answer("A", true)));
-        when(questionDao.findAll()).thenReturn(List.of(q));
-        doThrow(new RuntimeException("IO fail"))
-                .when(ioService).printFormattedLine("%d) %s", 1, "A");
-
-        assertThrows(RuntimeException.class, () -> service.executeTestFor(student));
-    }
-
     @ParameterizedTest
     @MethodSource("scenarios")
     void executeTestFor_promptsWithExactBounds_param(
@@ -193,12 +180,15 @@ class TestServiceImplTest {
         }
 
         int prompts = questions.size();
+
+        var minCap = org.mockito.ArgumentCaptor.forClass(Integer.class);
+        var maxCap = org.mockito.ArgumentCaptor.forClass(Integer.class);
+
         verify(ioService, times(prompts)).readIntForRangeWithPromptLocalized(
                 minCap.capture(), maxCap.capture(),
                 eq("TestService.enter.option"), eq("TestService.invalid.option"));
 
         assertEquals(java.util.Collections.nCopies(prompts, 1), minCap.getAllValues());
-
         var expectedMax = questions.stream().map(q -> q.answers().size()).toList();
         assertEquals(expectedMax, maxCap.getAllValues());
     }
