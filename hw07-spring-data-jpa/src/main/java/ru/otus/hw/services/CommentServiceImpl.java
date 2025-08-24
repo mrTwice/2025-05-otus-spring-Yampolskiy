@@ -28,7 +28,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional(readOnly = true)
     public List<Comment> findByBookId(long bookId) {
-        return commentRepository.findByBookId(bookId);
+        return commentRepository.findByBookIdOrderByCreatedAtDesc(bookId);
     }
 
     @Override

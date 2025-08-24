@@ -85,7 +85,7 @@ public class BookServiceImpl implements BookService {
     }
 
     private List<Genre> findGenresOrThrow(Set<Long> genresIds) {
-        var genres = genreRepository.findAllByIds(genresIds);
+        var genres = genreRepository.findByIdIn(genresIds);
         if (isEmpty(genres) || genres.size() != genresIds.size()) {
             throw new EntityNotFoundException("One or all genres with ids %s not found".formatted(genresIds));
         }

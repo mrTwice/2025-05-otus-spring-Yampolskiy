@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
@@ -15,7 +14,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(JpaCommentRepository.class)
 class CommentRepositoryTest {
 
     @Autowired
@@ -47,7 +45,7 @@ class CommentRepositoryTest {
         tem.flush();
         tem.clear();
 
-        var list = commentRepository.findByBookId(b.getId());
+        var list = commentRepository.findByBookIdOrderByCreatedAtDesc(b.getId());
         assertThat(list).hasSize(2);
         assertThat(list.get(0).getText()).isEqualTo("second");
         assertThat(list.get(1).getText()).isEqualTo("first");
