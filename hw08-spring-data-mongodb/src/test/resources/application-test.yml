@@ -1,0 +1,16 @@
+spring:
+  shell:
+    interactive:
+      enabled: false
+  autoconfigure:
+    exclude: org.springframework.shell.boot.StandardCommandsAutoConfiguration
+  data:
+    mongodb:
+      database: library-test
+      auto-index-creation: true
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 7.0.14
