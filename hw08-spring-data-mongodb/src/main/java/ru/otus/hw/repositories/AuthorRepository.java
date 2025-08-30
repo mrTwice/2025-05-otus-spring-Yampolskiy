@@ -1,7 +1,15 @@
 package ru.otus.hw.repositories;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
 import ru.otus.hw.models.Author;
 
-public interface AuthorRepository extends JpaRepository<Author, Long> {
+import java.util.Optional;
+
+@Repository
+public interface AuthorRepository extends MongoRepository<Author, String> {
+
+    Optional<Author> findByFullName(String fullName);
+
+    boolean existsByFullName(String fullName);
 }

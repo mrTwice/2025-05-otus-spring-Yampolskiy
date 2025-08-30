@@ -17,34 +17,40 @@ public class CommentCommands {
     private final CommentConverter commentConverter;
 
     @ShellMethod(value = "Find comment by id", key = "cbid")
-    public String findCommentById(long id) {
+    public String findCommentById(String id) {
         return commentService.findById(id)
                 .map(commentConverter::commentToString)
-                .orElse("Comment with id %d not found".formatted(id));
+                .orElse("Comment with id %s not found".formatted(id));
     }
 
     @ShellMethod(value = "Find comments by book id", key = "cbbid")
-    public String findCommentsByBookId(long bookId) {
-        var sep = "," + System.lineSeparator();
-        return commentService.findByBookId(bookId).stream()
+    public String findCommentsByBookId(String bookId) {
+        var comments = commentService.findByBookId(bookId);
+        var header = commentConverter.headerWithCount(comments.size());
+        if (comments.isEmpty()) {
+            return header + System.lineSeparator() + "— nothing to show —";
+        }
+        var body = comments.stream()
                 .map(commentConverter::commentToString)
-                .collect(Collectors.joining(sep));
+                .collect(Collectors.joining(System.lineSeparator()));
+        return header + System.lineSeparator() + body;
     }
 
     @ShellMethod(value = "Insert comment (bookId, text)", key = "cins")
-    public String insertComment(long bookId, String text) {
+    public String insertComment(String bookId, String text) {
         var saved = commentService.insert(bookId, text);
-        return commentConverter.commentToString(saved);
+        return "Created:" + System.lineSeparator() + commentConverter.commentToString(saved);
     }
 
     @ShellMethod(value = "Update comment (id, text)", key = "cupd")
-    public String updateComment(long id, String text) {
+    public String updateComment(String id, String text) {
         var updated = commentService.update(id, text);
-        return commentConverter.commentToString(updated);
+        return "Updated:" + System.lineSeparator() + commentConverter.commentToString(updated);
     }
 
     @ShellMethod(value = "Delete comment by id", key = "cdel")
-    public void deleteComment(long id) {
+    public String deleteComment(String id) {
         commentService.deleteById(id);
+        return "Deleted comment %s (if existed)".formatted(id);
     }
 }

@@ -18,8 +18,14 @@ public class AuthorCommands {
 
     @ShellMethod(value = "Find all authors", key = "aa")
     public String findAllAuthors() {
-        return authorService.findAll().stream()
+        var authors = authorService.findAll();
+        var header = authorConverter.headerWithCount(authors.size());
+        if (authors.isEmpty()) {
+            return header + System.lineSeparator() + "— nothing to show —";
+        }
+        var body = authors.stream()
                 .map(authorConverter::authorToString)
-                .collect(Collectors.joining("," + System.lineSeparator()));
+                .collect(Collectors.joining(System.lineSeparator()));
+        return header + System.lineSeparator() + body;
     }
 }

@@ -5,7 +5,16 @@ import ru.otus.hw.models.Author;
 
 @Component
 public class AuthorConverter {
+
     public String authorToString(Author author) {
-        return "Id: %d, FullName: %s".formatted(author.getId(), author.getFullName());
+        if (author == null) {
+            return "";
+        }
+        String id = author.getId() == null ? "-" : author.getId();
+        return "%s  %s".formatted(id, author.getFullName().trim());
+    }
+
+    public String headerWithCount(int count) {
+        return "Authors (%d)".formatted(count);
     }
 }

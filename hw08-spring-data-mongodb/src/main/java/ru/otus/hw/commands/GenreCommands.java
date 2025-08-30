@@ -18,8 +18,14 @@ public class GenreCommands {
 
     @ShellMethod(value = "Find all genres", key = "ag")
     public String findAllGenres() {
-        return genreService.findAll().stream()
+        var genres = genreService.findAll();
+        var header = genreConverter.headerWithCount(genres.size());
+        if (genres.isEmpty()) {
+            return header + System.lineSeparator() + "— nothing to show —";
+        }
+        var body = genres.stream()
                 .map(genreConverter::genreToString)
-                .collect(Collectors.joining("," + System.lineSeparator()));
+                .collect(Collectors.joining(System.lineSeparator()));
+        return header + System.lineSeparator() + body;
     }
 }

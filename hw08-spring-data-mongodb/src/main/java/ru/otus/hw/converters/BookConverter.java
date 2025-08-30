@@ -6,22 +6,32 @@ import ru.otus.hw.models.Book;
 
 import java.util.stream.Collectors;
 
+
 @RequiredArgsConstructor
 @Component
 public class BookConverter {
-    private final AuthorConverter authorConverter;
-
-    private final GenreConverter genreConverter;
 
     public String bookToString(Book book) {
-        var genresString = book.getGenres().stream()
-                .map(genreConverter::genreToString)
+        if (book == null) {
+            return "";
+        }
+
+        String id = book.getId() == null ? "-" : book.getId();
+        String title = book.getTitle().trim();
+        String authorId = book.getAuthorId().trim();
+
+        String genres = (book.getGenreIds() == null || book.getGenreIds().isEmpty())
+                ? "-"
+                : book.getGenreIds().stream()
+                .map(String::trim)
                 .map("{%s}"::formatted)
                 .collect(Collectors.joining(", "));
-        return "Id: %d, title: %s, author: {%s}, genres: [%s]".formatted(
-                book.getId(),
-                book.getTitle(),
-                authorConverter.authorToString(book.getAuthor()),
-                genresString);
+
+        return "%s  \"%s\"  authorId=%s  genres=[%s]"
+                .formatted(id, title, authorId, genres);
+    }
+
+    public String headerWithCount(int count) {
+        return "Books (%d)".formatted(count);
     }
 }

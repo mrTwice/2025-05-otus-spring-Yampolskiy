@@ -20,32 +20,39 @@ public class BookCommands {
 
     @ShellMethod(value = "Find all books", key = "ab")
     public String findAllBooks() {
-        return bookService.findAll().stream()
+        var books = bookService.findAll();
+        var header = bookConverter.headerWithCount(books.size());
+        if (books.isEmpty()) {
+            return header + System.lineSeparator() + "— nothing to show —";
+        }
+        var body = books.stream()
                 .map(bookConverter::bookToString)
-                .collect(Collectors.joining("," + System.lineSeparator()));
+                .collect(Collectors.joining(System.lineSeparator()));
+        return header + System.lineSeparator() + body;
     }
 
     @ShellMethod(value = "Find book by id", key = "bbid")
-    public String findBookById(long id) {
+    public String findBookById(String id) {
         return bookService.findById(id)
                 .map(bookConverter::bookToString)
-                .orElse("Book with id %d not found".formatted(id));
+                .orElse("Book with id %s not found".formatted(id));
     }
 
     @ShellMethod(value = "Insert book", key = "bins")
-    public String insertBook(String title, long authorId, Set<Long> genresIds) {
+    public String insertBook(String title, String authorId, Set<String> genresIds) {
         var savedBook = bookService.insert(title, authorId, genresIds);
-        return bookConverter.bookToString(savedBook);
+        return "Created:" + System.lineSeparator() + bookConverter.bookToString(savedBook);
     }
 
     @ShellMethod(value = "Update book", key = "bupd")
-    public String updateBook(long id, String title, long authorId, Set<Long> genresIds) {
+    public String updateBook(String id, String title, String authorId, Set<String> genresIds) {
         var savedBook = bookService.update(id, title, authorId, genresIds);
-        return bookConverter.bookToString(savedBook);
+        return "Updated:" + System.lineSeparator() + bookConverter.bookToString(savedBook);
     }
 
     @ShellMethod(value = "Delete book by id", key = "bdel")
-    public void deleteBook(long id) {
+    public String deleteBook(String id) {
         bookService.deleteById(id);
+        return "Deleted book %s (if existed)".formatted(id);
     }
 }
