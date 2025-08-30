@@ -1,0 +1,16 @@
+{
+  "properties": [
+    {
+      "name": "app.shell.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable interactive shell beans.",
+      "defaultValue": true
+    },
+    {
+      "name": "app.shell.system-exit",
+      "type": "java.lang.Boolean",
+      "description": "Call System.exit on shell 'exit' command.",
+      "defaultValue": true
+    }
+  ]
+}
