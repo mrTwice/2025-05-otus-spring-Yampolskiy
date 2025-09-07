@@ -21,6 +21,7 @@
         <spring.shell.version>3.2.4</spring.shell.version>
         <checkstyle-plugin.version>3.3.1</checkstyle-plugin.version>
         <checkstyle.version>10.15.0</checkstyle.version>
+        <mapstruct.version>1.6.2</mapstruct.version>
         <flyway.version>11.11.0</flyway.version>
         <reflections.version>0.10.2</reflections.version>
         <checkstyle.config.url>
@@ -29,6 +30,12 @@
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.reflections</groupId>
