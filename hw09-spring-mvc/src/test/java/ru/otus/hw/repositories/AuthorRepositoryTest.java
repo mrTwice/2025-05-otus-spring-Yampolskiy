@@ -20,8 +20,8 @@ class AuthorRepositoryTest {
 
     @Test
     void findAll_returnsAllAuthors() {
-        var a1 = tem.persistFlushFind(new Author(null, "A1"));
-        var a2 = tem.persistFlushFind(new Author(null, "A2"));
+        var a1 = tem.persistFlushFind(new Author( "A1"));
+        var a2 = tem.persistFlushFind(new Author("A2"));
 
         List<Author> all = authorRepository.findAll();
 
@@ -30,7 +30,7 @@ class AuthorRepositoryTest {
 
     @Test
     void findById_returnsAuthor() {
-        var a = tem.persistFlushFind(new Author(null, "A1"));
+        var a = tem.persistFlushFind(new Author( "A1"));
 
         var found = authorRepository.findById(a.getId());
 

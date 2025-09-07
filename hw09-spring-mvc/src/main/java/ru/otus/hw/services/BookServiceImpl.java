@@ -52,7 +52,7 @@ public class BookServiceImpl implements BookService {
         var book = new Book();
         book.setTitle(title);
         book.setAuthor(author);
-        book.setGenres(genres);
+        book.setGenres(Set.copyOf(genres));
 
         return bookRepository.save(book);
     }
@@ -73,7 +73,7 @@ public class BookServiceImpl implements BookService {
 
         book.setTitle(title);
         book.setAuthor(author);
-        book.setGenres(genres);
+        book.setGenres(Set.copyOf(genres));
 
         return bookRepository.save(book);
     }

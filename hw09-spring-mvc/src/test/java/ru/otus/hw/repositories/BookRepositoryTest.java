@@ -8,7 +8,7 @@ import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 
-import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,14 +23,14 @@ class BookRepositoryTest {
 
     @Test
     void findAll_fetchesAuthorAndGenres_withoutLazyErrorsInsideTestTx() {
-        var a = tem.persistFlushFind(new Author(null, "AuthorA"));
-        var g1 = tem.persistFlushFind(new Genre(null, "G1"));
-        var g2 = tem.persistFlushFind(new Genre(null, "G2"));
+        var a = tem.persistFlushFind(new Author("AuthorA"));
+        var g1 = tem.persistFlushFind(new Genre("G1"));
+        var g2 = tem.persistFlushFind(new Genre( "G2"));
 
         var b = new Book();
         b.setTitle("T");
         b.setAuthor(a);
-        b.setGenres(List.of(g1, g2));
+        b.setGenres(Set.of(g1, g2));
         tem.persist(b);
         tem.flush();
         tem.clear();
@@ -49,12 +49,12 @@ class BookRepositoryTest {
 
     @Test
     void findById_fetchesAuthorAndGenres() {
-        var a = tem.persistFlushFind(new Author(null, "AuthorA"));
-        var g1 = tem.persistFlushFind(new Genre(null, "G1"));
+        var a = tem.persistFlushFind(new Author("AuthorA"));
+        var g1 = tem.persistFlushFind(new Genre("G1"));
         var b = new Book();
         b.setTitle("T2");
         b.setAuthor(a);
-        b.setGenres(List.of(g1));
+        b.setGenres(Set.of(g1));
         tem.persist(b);
         tem.flush();
         tem.clear();

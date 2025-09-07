@@ -9,7 +9,7 @@ import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
 import ru.otus.hw.models.Genre;
 
-import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,12 +24,12 @@ class CommentRepositoryTest {
 
     @Test
     void findByBookId_returnsLatestFirst_andBookIsAccessible() {
-        var a = tem.persistFlushFind(new Author(null, "A"));
-        var g = tem.persistFlushFind(new Genre(null, "G"));
+        var a = tem.persistFlushFind(new Author("A"));
+        var g = tem.persistFlushFind(new Genre("G"));
         var b = new Book();
         b.setTitle("T");
         b.setAuthor(a);
-        b.setGenres(List.of(g));
+        b.setGenres(Set.of(g));
         tem.persist(b);
 
         var c1 = new Comment();
