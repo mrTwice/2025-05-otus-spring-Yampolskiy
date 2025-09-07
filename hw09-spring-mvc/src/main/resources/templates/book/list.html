@@ -2,8 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head><title>Книги</title></head>
 <body>
-<div th:replace="fragments/nav :: topnav"></div>
-
+<div th:insert="~{fragments/nav :: topnav}"></div>
 <h1>Список книг</h1>
 <p><a th:href="@{/books/new}">Добавить книгу</a></p>
 

@@ -34,8 +34,9 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Book> findById(long id) {
-        return bookRepository.findById(id);
+    public Book findById(long id) {
+        return bookRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Book with id %d not found".formatted(id)));
     }
 
     @Override
@@ -54,9 +55,7 @@ public class BookServiceImpl implements BookService {
     @Transactional
     public Book insert(String title, long authorId, Set<Long> genresIds) {
         String normalizedTitle = normalizeAndValidateTitle(title);
-        if (genresIds == null || genresIds.isEmpty()) {
-            throw new ValidationException("Book must have at least one genre");
-        }
+        requireNonEmptyGenresIds(genresIds);
 
         var author = authorRepository.findById(authorId)
                 .orElseThrow(() -> new NotFoundException("Author with id %d not found".formatted(authorId)));
@@ -76,9 +75,7 @@ public class BookServiceImpl implements BookService {
     @Transactional
     public Book update(long id, String title, long authorId, Set<Long> genresIds) {
         String normalizedTitle = normalizeAndValidateTitle(title);
-        if (genresIds == null || genresIds.isEmpty()) {
-            throw new ValidationException("Book must have at least one genre");
-        }
+        requireNonEmptyGenresIds(genresIds);
 
         var book = bookRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Book with id %d not found".formatted(id)));
@@ -111,7 +108,7 @@ public class BookServiceImpl implements BookService {
         var found = genreRepository.findByIdIn(genresIds);
 
         if (found.isEmpty()) {
-            throw new ValidationException("Book must have at least one genre");
+            throw new AssociationViolationException("All genres not found: " + genresIds);
         }
 
         var foundIds = found.stream()
@@ -122,7 +119,6 @@ public class BookServiceImpl implements BookService {
             missing.removeAll(foundIds);
             throw new AssociationViolationException("Some genres not found: " + missing);
         }
-
 
         return new LinkedHashSet<>(found);
     }
@@ -136,6 +132,12 @@ public class BookServiceImpl implements BookService {
             throw new ValidationException("Title must not be blank");
         }
         return trimmed;
+    }
+
+    private void requireNonEmptyGenresIds(Set<Long> genresIds) {
+        if (genresIds == null || genresIds.isEmpty()) {
+            throw new ValidationException("Book must have at least one genre");
+        }
     }
 
 }

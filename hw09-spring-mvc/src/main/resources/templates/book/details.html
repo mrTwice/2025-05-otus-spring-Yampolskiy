@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head><title th:text="${book.title}">Книга</title></head>
 <body>
-<div th:replace="fragments/nav :: topnav"></div>
+<th:block th:insert="~{fragments/nav :: topnav}"></th:block>
 
 <h1 th:text="${book.title}">Название</h1>
 <p><b>Автор:</b> <span th:text="${book.author.fullName}">Автор</span></p>

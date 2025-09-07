@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface BookService {
-    Optional<Book> findById(long id);
+    Book findById(long id);
 
     List<Book> findAll();
 

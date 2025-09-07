@@ -2,8 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head><title>Жанры</title></head>
 <body>
-<div th:replace="fragments/nav :: topnav"></div>
-
+<div th:insert="~{fragments/nav :: topnav}"></div>
 <h1>Список жанров</h1>
 <table>
     <thead><tr><th>ID</th><th>Название</th></tr></thead>

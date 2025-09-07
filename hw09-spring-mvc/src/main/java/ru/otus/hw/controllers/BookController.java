@@ -8,13 +8,17 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.otus.hw.dto.BookDetailsDto;
 import ru.otus.hw.dto.BookForm;
+import ru.otus.hw.dto.CommentForm;
 import ru.otus.hw.mappers.BookMapper;
+import ru.otus.hw.mappers.CommentMapper;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 import ru.otus.hw.services.AuthorService;
 import ru.otus.hw.services.BookService;
+import ru.otus.hw.services.CommentService;
 import ru.otus.hw.services.GenreService;
 
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 @Controller
@@ -23,9 +27,16 @@ import java.util.stream.Collectors;
 public class BookController {
 
     private final BookService bookService;
+
     private final AuthorService authorService;
+
     private final GenreService genreService;
+
+    private final CommentService commentService;
+
     private final BookMapper bookMapper;
+
+    private final CommentMapper commentMapper;
 
     @GetMapping
     public String list(Model model) {
@@ -38,10 +49,16 @@ public class BookController {
 
     @GetMapping("/{id}")
     public String details(@PathVariable long id, Model model) {
-        Book book = bookService.findById(id)
-                .orElseThrow(() -> new ru.otus.hw.exceptions.NotFoundException("Book with id %d not found".formatted(id)));
+        Book book = bookService.findById(id);
         BookDetailsDto dto = bookMapper.toDetailsDto(book);
         model.addAttribute("book", dto);
+
+        var comments = commentService.findByBookId(id).stream()
+                .map(commentMapper::toDto)
+                .toList();
+        model.addAttribute("comments", comments);
+
+        model.addAttribute("commentForm", new CommentForm());
         return "book/details";
     }
 
@@ -54,14 +71,13 @@ public class BookController {
 
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable long id, Model model) {
-        Book book = bookService.findById(id)
-                .orElseThrow(() -> new ru.otus.hw.exceptions.NotFoundException("Book with id %d not found".formatted(id)));
+        Book book = bookService.findById(id);
 
         var form = BookForm.builder()
                 .id(book.getId())
                 .title(book.getTitle())
                 .authorId(book.getAuthor().getId())
-                .genresIds(book.getGenres().stream().map(Genre::getId).collect(Collectors.toCollection(java.util.LinkedHashSet::new)))
+                .genresIds(book.getGenres().stream().map(Genre::getId).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .version(book.getVersion())
                 .build();
 

@@ -27,7 +27,7 @@ public interface BookMapper {
 
     @Mappings({
             @Mapping(target = "authorFullName", source = "author.fullName"),
-            @Mapping(target = "genresSummary", qualifiedByName = "joinGenreNames")
+            @Mapping(target = "genresSummary", source = "entity", qualifiedByName = "joinGenreNames")
     })
     BookListItemDto toListItemDto(Book entity);
 
