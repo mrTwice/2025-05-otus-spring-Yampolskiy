@@ -31,11 +31,14 @@ public class GlobalExceptionHandler {
     public Object handleBusiness(BusinessException ex, HttpServletRequest req) {
         HttpStatus status = statusMapper.toStatus(ex.getCode());
         logAtLevel(ex, status);
-        return negotiator.respond(
-                req, status, null,
-                ex.getCode().name(), ex.getMessage(),
-                Map.of("code", ex.getCode().name())
-        );
+
+        var params = ErrorResponseParams.builder(status)
+                .title(ex.getCode().name())
+                .detail(ex.getMessage())
+                .props(Map.of("code", ex.getCode().name()))
+                .build();
+
+        return negotiator.respond(req, params);
     }
 
     @ExceptionHandler({ MethodArgumentNotValidException.class, BindException.class })
@@ -45,11 +48,17 @@ public class GlobalExceptionHandler {
                 ? manve.getBindingResult()
                 : ((BindException) ex).getBindingResult();
 
-        return negotiator.respond(
-                req, status, "error/400",
-                ErrorCode.VALIDATION.name(), "Validation failed",
-                Map.of("code", ErrorCode.VALIDATION.name(), "errors", valExtractor.toList(br))
+        var params = p(
+                status,
+                "error/400",
+                ErrorCode.VALIDATION.name(),
+                "Validation failed",
+                Map.of(
+                        "code", ErrorCode.VALIDATION.name(),
+                        "errors", valExtractor.toList(br)
+                )
         );
+        return negotiator.respond(req, params);
     }
 
     @ExceptionHandler({
@@ -65,12 +74,17 @@ public class GlobalExceptionHandler {
             String required = (mm.getRequiredType() != null) ? mm.getRequiredType().getSimpleName() : "required type";
             msg = "Parameter '%s' has invalid value '%s' (expected %s)".formatted(name, value, required);
         }
-        return negotiator.respond(
-                req, status, "error/400",
-                ErrorCode.VALIDATION.name(), msg,
+
+        var params = p(
+                status,
+                "error/400",
+                ErrorCode.VALIDATION.name(),
+                msg,
                 Map.of("code", ErrorCode.VALIDATION.name())
         );
+        return negotiator.respond(req, params);
     }
+
 
     @ExceptionHandler({ NoHandlerFoundException.class, NoResourceFoundException.class })
     public Object handleNotFound404(Exception ex, HttpServletRequest req) {
@@ -81,20 +95,39 @@ public class GlobalExceptionHandler {
                 ? "Resource not found: " + nrf.getResourcePath()
                 : "Not found");
         log.warn("404 Not Found: {}", msg);
-        return negotiator.respond(
-                req, status, "error/404",
-                ErrorCode.NOT_FOUND.name(), msg,
+
+        var params = p(
+                status,
+                "error/404",
+                ErrorCode.NOT_FOUND.name(),
+                msg,
                 Map.of("code", ErrorCode.NOT_FOUND.name())
         );
+        return negotiator.respond(req, params);
     }
+
 
     @ExceptionHandler(Exception.class)
     public Object handleAny(Exception ex, HttpServletRequest req) {
         log.error("Unhandled exception", ex);
-        return negotiator.respond(
-                req, HttpStatus.INTERNAL_SERVER_ERROR, "error/500",
-                "INTERNAL_SERVER_ERROR", "Internal server error", null
+        var params = p(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "error/500",
+                "INTERNAL_SERVER_ERROR",
+                "Internal server error",
+                Map.of()
         );
+        return negotiator.respond(req, params);
+    }
+
+
+    private ErrorResponseParams p(HttpStatus status, String view, String title, String detail, Map<String, ?> props) {
+        return ErrorResponseParams.builder(status)
+                .view(view)
+                .title(title)
+                .detail(detail)
+                .props(props == null ? Map.of() : props)
+                .build();
     }
 
     private void logAtLevel(BusinessException ex, HttpStatus status) {

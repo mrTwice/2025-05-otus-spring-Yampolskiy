@@ -15,8 +15,12 @@ public class ProblemDetailFactory {
 
     public ProblemDetail create(HttpStatus status, String title, String detail, Map<String, ?> props) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(status, detail);
-        if (title != null) pd.setTitle(title);
-        if (props != null) props.forEach(pd::setProperty);
+        if (title != null) {
+            pd.setTitle(title);
+        }
+        if (props != null) {
+            props.forEach(pd::setProperty);
+        }
         return pd;
     }
 }

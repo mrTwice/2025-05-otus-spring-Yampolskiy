@@ -1,6 +1,8 @@
 package ru.otus.hw.mappers;
 
-import org.mapstruct.*;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
 import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.dto.CommentForm;
 import ru.otus.hw.models.Book;

@@ -5,8 +5,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
 import ru.otus.hw.dto.BookDetailsDto;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import ru.otus.hw.dto.BookForm;
 import ru.otus.hw.dto.CommentForm;
 import ru.otus.hw.mappers.BookMapper;
@@ -77,7 +81,9 @@ public class BookController {
                 .id(book.getId())
                 .title(book.getTitle())
                 .authorId(book.getAuthor().getId())
-                .genresIds(book.getGenres().stream().map(Genre::getId).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .genresIds(book.getGenres().stream()
+                        .map(Genre::getId)
+                        .collect(Collectors.toCollection(LinkedHashSet::new)))
                 .version(book.getVersion())
                 .build();
 

@@ -15,9 +15,11 @@ public class GenreRefResolver {
     private final GenreRepository genreRepository;
 
     public Set<Genre> byIds(Set<Long> ids) {
-        if (ids == null || ids.isEmpty()) return new LinkedHashSet<>();
+        if (ids == null || ids.isEmpty()) {
+            return new LinkedHashSet<>();
+        }
         return ids.stream()
-                .map(id -> genreRepository.findById( id).orElse(null))
+                .map(id -> genreRepository.findById(id).orElse(null))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }
