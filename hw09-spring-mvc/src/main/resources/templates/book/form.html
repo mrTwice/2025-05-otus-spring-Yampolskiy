@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head><title th:text="${form.id} != null ? 'Редактирование книги' : 'Новая книга'">Книга</title></head>
 <body>
-<div th:replace="fragments/nav :: topnav"></div>
+<div th:replace="~{fragments/nav :: topnav}"></div>
 
 <h1 th:text="${form.id} != null ? 'Редактировать книгу' : 'Создать книгу'">Книга</h1>
 
@@ -11,15 +11,15 @@
     <input type="hidden" th:field="*{version}"/>
 
     <div>
-        <label>Название</label><br/>
-        <input type="text" th:field="*{title}" maxlength="255"/>
+        <label for="title">Название</label>
+        <input id="title" type="text" th:field="*{title}" maxlength="255"/>
         <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
     </div>
 
     <div>
         <label>Автор</label><br/>
         <select th:field="*{authorId}">
-            <option value="" disabled selected>— выберите автора —</option>
+            <option th:if="${form.authorId == null}" value="" disabled selected>— выберите автора —</option>
             <option th:each="a : ${authors}" th:value="${a.id}" th:text="${a.fullName}"></option>
         </select>
         <div th:if="${#fields.hasErrors('authorId')}" th:errors="*{authorId}"></div>

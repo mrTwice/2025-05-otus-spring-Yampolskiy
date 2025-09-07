@@ -43,7 +43,7 @@ class BookServiceIT {
 
         var saved = bookService.insert("IT-Book", authorId, genreIds);
 
-        var loaded = bookService.findById(saved.getId()).orElseThrow();
+        var loaded = bookService.findById(saved.getId());
 
         assertThat(loaded.getAuthor().getId()).isEqualTo(authorId);
         assertThat(loaded.getGenres())
