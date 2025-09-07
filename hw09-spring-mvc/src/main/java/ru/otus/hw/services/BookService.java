@@ -1,5 +1,7 @@
 package ru.otus.hw.services;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import ru.otus.hw.models.Book;
 
 import java.util.List;
@@ -16,4 +18,6 @@ public interface BookService {
     Book update(long id, String title, long authorId, Set<Long> genresIds);
 
     void deleteById(long id);
+
+    Page<Book> findAll(Pageable pageable);
 }

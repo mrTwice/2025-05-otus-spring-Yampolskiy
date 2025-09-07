@@ -1,21 +1,27 @@
 package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.exceptions.AssociationViolationException;
+import ru.otus.hw.exceptions.NotFoundException;
+import ru.otus.hw.exceptions.ValidationException;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.GenreRepository;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import static org.springframework.util.CollectionUtils.isEmpty;
-
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class BookServiceImpl implements BookService {
@@ -41,39 +47,44 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public Book insert(String title, long authorId, Set<Long> genresIds) {
-        if (isEmpty(genresIds)) {
-            throw new IllegalArgumentException("Genres ids must not be null or empty");
+        String normalizedTitle = normalizeAndValidateTitle(title);
+        if (genresIds == null || genresIds.isEmpty()) {
+            throw new ValidationException("Book must have at least one genre");
         }
 
         var author = authorRepository.findById(authorId)
-                .orElseThrow(() -> new EntityNotFoundException("Author with id %d not found".formatted(authorId)));
+                .orElseThrow(() -> new NotFoundException("Author with id %d not found".formatted(authorId)));
+
         var genres = findGenresOrThrow(genresIds);
 
         var book = new Book();
-        book.setTitle(title);
+        book.setTitle(normalizedTitle);
         book.setAuthor(author);
-        book.setGenres(Set.copyOf(genres));
+        book.replaceGenres(genres);
 
         return bookRepository.save(book);
     }
 
+
     @Override
     @Transactional
     public Book update(long id, String title, long authorId, Set<Long> genresIds) {
-        if (isEmpty(genresIds)) {
-            throw new IllegalArgumentException("Genres ids must not be null or empty");
+        String normalizedTitle = normalizeAndValidateTitle(title);
+        if (genresIds == null || genresIds.isEmpty()) {
+            throw new ValidationException("Book must have at least one genre");
         }
 
         var book = bookRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(id)));
+                .orElseThrow(() -> new NotFoundException("Book with id %d not found".formatted(id)));
 
         var author = authorRepository.findById(authorId)
-                .orElseThrow(() -> new EntityNotFoundException("Author with id %d not found".formatted(authorId)));
+                .orElseThrow(() -> new NotFoundException("Author with id %d not found".formatted(authorId)));
+
         var genres = findGenresOrThrow(genresIds);
 
-        book.setTitle(title);
+        book.setTitle(normalizedTitle);
         book.setAuthor(author);
-        book.setGenres(Set.copyOf(genres));
+        book.replaceGenres(genres);
 
         return bookRepository.save(book);
     }
@@ -81,15 +92,50 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public void deleteById(long id) {
-        bookRepository.deleteById(id);
+        try {
+            bookRepository.deleteById(id);
+        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+            throw new NotFoundException(
+                    "Book with id %d not found".formatted(id), e);
+        }
     }
 
-    private List<Genre> findGenresOrThrow(Set<Long> genresIds) {
-        var genres = genreRepository.findByIdIn(genresIds);
-        if (isEmpty(genres) || genres.size() != genresIds.size()) {
-            throw new EntityNotFoundException("One or all genres with ids %s not found".formatted(genresIds));
+
+    private Set<Genre> findGenresOrThrow(Set<Long> genresIds) {
+        var found = genreRepository.findByIdIn(genresIds);
+
+        if (found.isEmpty()) {
+            throw new ValidationException("Book must have at least one genre");
         }
-        return genres;
+
+        var foundIds = found.stream()
+                .map(Genre::getId)
+                .collect(Collectors.toSet());
+        if (foundIds.size() != genresIds.size()) {
+            var missing = new LinkedHashSet<>(genresIds);
+            missing.removeAll(foundIds);
+            throw new AssociationViolationException("Some genres not found: " + missing);
+        }
+
+
+        return new LinkedHashSet<>(found);
+    }
+
+    private String normalizeAndValidateTitle(String title) {
+        if (title == null) {
+            throw new ValidationException("Title must not be blank");
+        }
+        var trimmed = title.trim();
+        if (trimmed.isEmpty()) {
+            throw new ValidationException("Title must not be blank");
+        }
+        return trimmed;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Book> findAll(Pageable pageable) {
+        return bookRepository.findAll(pageable);
     }
 }
 

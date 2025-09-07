@@ -7,6 +7,9 @@ import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.GenreRepository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+
 @SpringBootTest(
         properties = {
                 "spring.shell.interactive.enabled=false",
@@ -29,7 +32,7 @@ class BookServiceIT {
         var authorId = authorRepository.findAll().get(0).getId();
 
         var allGenres = genreRepository.findAll();
-        org.assertj.core.api.Assertions.assertThat(allGenres)
+        assertThat(allGenres)
                 .as("В тестовых данных должно быть минимум 2 жанра")
                 .hasSizeGreaterThanOrEqualTo(2);
 
@@ -42,8 +45,8 @@ class BookServiceIT {
 
         var loaded = bookService.findById(saved.getId()).orElseThrow();
 
-        org.assertj.core.api.Assertions.assertThat(loaded.getAuthor().getId()).isEqualTo(authorId);
-        org.assertj.core.api.Assertions.assertThat(loaded.getGenres())
+        assertThat(loaded.getAuthor().getId()).isEqualTo(authorId);
+        assertThat(loaded.getGenres())
                 .extracting(Genre::getId)
                 .containsAll(genreIds);
     }
