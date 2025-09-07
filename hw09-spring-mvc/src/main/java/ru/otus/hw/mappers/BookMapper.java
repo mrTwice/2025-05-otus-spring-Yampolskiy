@@ -30,9 +30,10 @@ public interface BookMapper {
             @Mapping(target = "genresSummary", qualifiedByName = "joinGenreNames")
     })
     BookListItemDto toListItemDto(Book entity);
+
     @Mappings({
             @Mapping(target = "author", source = "authorId", qualifiedByName = "resolveAuthor"),
-            @Mapping(target = "genres", source = "genresIds", qualifiedByName = "resolveGenres"),
+            @Mapping(target = "genres", ignore = true)
     })
     Book fromForm(BookForm form, @Context AuthorRefResolver authorRef, @Context GenreRefResolver genreRef);
 
@@ -44,7 +45,6 @@ public interface BookMapper {
     })
     void updateFromForm(BookForm form, @MappingTarget Book target,
                         @Context AuthorRefResolver authorRef, @Context GenreRefResolver genreRef);
-
 
     @AfterMapping
     default void applyGenres(BookForm form, @MappingTarget Book target, @Context GenreRefResolver genreRef) {
@@ -70,4 +70,3 @@ public interface BookMapper {
                 .collect(Collectors.joining(", "));
     }
 }
-

@@ -45,6 +45,12 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Page<Book> findAll(Pageable pageable) {
+        return bookRepository.findPageWithAuthorAndGenres(pageable);
+    }
+
+    @Override
     @Transactional
     public Book insert(String title, long authorId, Set<Long> genresIds) {
         String normalizedTitle = normalizeAndValidateTitle(title);
@@ -132,10 +138,5 @@ public class BookServiceImpl implements BookService {
         return trimmed;
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<Book> findAll(Pageable pageable) {
-        return bookRepository.findAll(pageable);
-    }
 }
 
