@@ -15,6 +15,7 @@ import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.CommentRepository;
 import ru.otus.hw.repositories.GenreRepository;
 
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
@@ -169,9 +170,9 @@ class CommentServiceIT {
     @Test
     @DisplayName("deleteById: удаляет существующий комментарий, остальные остаются")
     void deleteById_deletesOnlyTarget() {
-        var c1 = commentRepository.save(new Comment(null, "c1", null, book1Id));
-        var c2 = commentRepository.save(new Comment(null, "c2", null, book1Id));
-        var cOtherBook = commentRepository.save(new Comment(null, "other", null, book2Id));
+        var c1 = commentRepository.save(new Comment(null, "c1", Instant.now().minusSeconds(3), book1Id));
+        var c2 = commentRepository.save(new Comment(null, "c2", Instant.now().minusSeconds(2), book1Id));
+        var cOtherBook = commentRepository.save(new Comment(null, "other", Instant.now().minusSeconds(1), book2Id));
 
         commentService.deleteById(c1.getId());
 

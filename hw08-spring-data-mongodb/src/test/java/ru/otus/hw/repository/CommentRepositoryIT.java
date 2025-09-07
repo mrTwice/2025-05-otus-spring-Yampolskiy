@@ -16,6 +16,7 @@ import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.CommentRepository;
 import ru.otus.hw.repositories.GenreRepository;
 
+import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,9 +66,9 @@ class CommentRepositoryIT {
     @Test
     @DisplayName("findByBookIdOrderByCreatedAtDesc: сортирует по createdAt по убыванию")
     void findByBookId_sorted_desc() {
-        commentRepository.save(new Comment(null, "t1", null, book1Id));
-        commentRepository.save(new Comment(null, "t2", null, book1Id));
-        commentRepository.save(new Comment(null, "t3", null, book1Id));
+        commentRepository.save(new Comment(null, "t1", Instant.now().minusSeconds(3), book1Id));
+        commentRepository.save(new Comment(null, "t2", Instant.now().minusSeconds(2), book1Id));
+        commentRepository.save(new Comment(null, "t3", Instant.now().minusSeconds(1), book1Id));
 
         var result = commentRepository.findByBookIdOrderByCreatedAtDesc(book1Id);
 
@@ -88,9 +89,9 @@ class CommentRepositoryIT {
     @Test
     @DisplayName("deleteByBookId: удаляет только комментарии указанной книги и возвращает их количество")
     void deleteByBookId_deletesOnlyTargetBooksComments() {
-        var c1 = new Comment(null, "a1", null, book1Id);
-        var c2 = new Comment(null, "a2", null, book1Id);
-        var c3 = new Comment(null, "b1", null, book2Id);
+        var c1 = new Comment(null, "a1", Instant.now().minusSeconds(3), book1Id);
+        var c2 = new Comment(null, "a2", Instant.now().minusSeconds(2), book1Id);
+        var c3 = new Comment(null, "b1", Instant.now().minusSeconds(1), book2Id);
         commentRepository.saveAll(List.of(c1, c2, c3));
 
         int beforeBook1 = commentRepository.findByBookIdOrderByCreatedAtDesc(book1Id).size();
