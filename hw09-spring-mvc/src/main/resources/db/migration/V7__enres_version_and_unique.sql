@@ -1,2 +1,0 @@
-ALTER TABLE genres ADD COLUMN version BIGINT NOT NULL DEFAULT 0;
-ALTER TABLE genres ADD CONSTRAINT uq_genres_name UNIQUE (name);
