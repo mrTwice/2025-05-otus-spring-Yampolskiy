@@ -1,73 +1,73 @@
 package ru.otus.hw.mappers;
 
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.mapstruct.Named;
-import org.springframework.data.domain.Page;
+import org.mapstruct.*;
+import ru.otus.hw.components.AuthorRefResolver;
+import ru.otus.hw.components.GenreRefResolver;
 import ru.otus.hw.dto.BookDetailsDto;
 import ru.otus.hw.dto.BookForm;
 import ru.otus.hw.dto.BookListItemDto;
+import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 
-
-import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
 @Mapper(
         componentModel = "spring",
-        uses = { AuthorMapper.class, GenreMapper.class }
+        unmappedTargetPolicy = ReportingPolicy.ERROR,
+        unmappedSourcePolicy = ReportingPolicy.IGNORE,
+        uses = {AuthorMapper.class, GenreMapper.class, AuthorRefResolver.class, GenreRefResolver.class}
 )
 public interface BookMapper {
 
+    BookDetailsDto toDetailsDto(Book entity);
 
     @Mappings({
             @Mapping(target = "authorFullName", source = "author.fullName"),
-            @Mapping(target = "genresSummary", source = "genres", qualifiedByName = "joinGenreNames")
+            @Mapping(target = "genresSummary", qualifiedByName = "joinGenreNames")
     })
-    BookListItemDto toListItemDto(Book source);
+    BookListItemDto toListItemDto(Book entity);
+    @Mappings({
+            @Mapping(target = "author", source = "authorId", qualifiedByName = "resolveAuthor"),
+            @Mapping(target = "genres", source = "genresIds", qualifiedByName = "resolveGenres"),
+    })
+    Book fromForm(BookForm form, @Context AuthorRefResolver authorRef, @Context GenreRefResolver genreRef);
 
-    List<BookListItemDto> toListItemDtos(List<Book> source);
+    @Mappings({
+            @Mapping(target = "author", source = "authorId", qualifiedByName = "resolveAuthor"),
+            @Mapping(target = "version", source = "version"),
+            @Mapping(target = "title", source = "title"),
+            @Mapping(target = "genres", ignore = true)
+    })
+    void updateFromForm(BookForm form, @MappingTarget Book target,
+                        @Context AuthorRefResolver authorRef, @Context GenreRefResolver genreRef);
 
-    default Page<BookListItemDto> toListItemPage(Page<Book> source) {
-        return source.map(this::toListItemDto);
+
+    @AfterMapping
+    default void applyGenres(BookForm form, @MappingTarget Book target, @Context GenreRefResolver genreRef) {
+        Set<Genre> resolved = resolveGenres(form.getGenresIds(), genreRef);
+        target.replaceGenres(resolved);
     }
 
-    @Mappings({
-            @Mapping(target = "author", source = "author"),
-            @Mapping(target = "genres", source = "genres")
-    })
-    BookDetailsDto toDetailsDto(Book source);
+    @Named("resolveAuthor")
+    default Author resolveAuthor(Long id, @Context AuthorRefResolver resolver) {
+        return resolver.byId(id);
+    }
 
-
-    @Mappings({
-            @Mapping(target = "authorId", source = "author.id"),
-            @Mapping(target = "genresIds", source = "genres", qualifiedByName = "toIdSet")
-    })
-    BookForm toForm(Book source);
-
+    @Named("resolveGenres")
+    default Set<Genre> resolveGenres(Set<Long> ids, @Context GenreRefResolver resolver) {
+        return resolver.byIds(ids);
+    }
 
     @Named("joinGenreNames")
-    default String joinGenreNames(Collection<Genre> genres) {
-        if (genres == null || genres.isEmpty()) {
-            return "";
-        }
-        return genres.stream()
+    default String joinGenreNames(Book src) {
+        if (src.getGenres() == null || src.getGenres().isEmpty()) return "";
+        return src.getGenres().stream()
                 .map(Genre::getName)
                 .collect(Collectors.joining(", "));
     }
-
-    @Named("toIdSet")
-    default Set<Long> toIdSet(Collection<Genre> genres) {
-        if (genres == null) {
-            return Set.of();
-        }
-        return genres.stream()
-                .map(Genre::getId)
-                .collect(Collectors.toCollection(java.util.LinkedHashSet::new));
-    }
 }
+
