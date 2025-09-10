@@ -14,6 +14,7 @@ import ru.otus.hw.repositories.CommentRepository;
 import ru.otus.hw.repositories.GenreRepository;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -69,7 +70,7 @@ class BookServiceIT {
     @Test
     @DisplayName("insert: успех и нормализация жанров, поверх стартового датасета")
     void insert_happyPath_onSeededData() {
-        var saved = bookService.insert(" New Book ", author1Id, new HashSet<>(java.util.List.of(g3, g1, g1, g2)));
+        var saved = bookService.insert(" New Book ", author1Id, new HashSet<>(List.of(g3, g1, g1, g2)));
 
         assertThat(saved.getId()).isNotBlank();
         assertThat(saved.getTitle()).isEqualTo("New Book");
