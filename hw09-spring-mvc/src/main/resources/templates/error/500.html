@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>500 Internal Server Error</title>
+    <meta charset="UTF-8"/>
+</head>
+<body>
+<h1>Внутренняя ошибка сервера</h1>
+<p th:text="${message}">Что-то пошло не так. Мы уже разбираемся.</p>
+<p><a th:href="@{/}">На главную</a></p>
+</body>
+</html>
