@@ -14,7 +14,7 @@ public interface BookService {
 
     Book insert(String title, long authorId, Set<Long> genresIds);
 
-    Book update(long id, String title, long authorId, Set<Long> genresIds);
+    Book update(long id, String title, long authorId, Set<Long> genresIds, long expectedVersion);
 
     void deleteById(long id);
 

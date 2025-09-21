@@ -2,22 +2,28 @@ package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.AssociationViolationException;
+import ru.otus.hw.exceptions.ConflictException;
 import ru.otus.hw.exceptions.NotFoundException;
 import ru.otus.hw.exceptions.ValidationException;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
+import ru.otus.hw.repositories.CommentRepository;
 import ru.otus.hw.repositories.GenreRepository;
 
-import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -30,6 +36,8 @@ public class BookServiceImpl implements BookService {
     private final GenreRepository genreRepository;
 
     private final BookRepository bookRepository;
+
+    private final CommentRepository commentRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -47,7 +55,19 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional(readOnly = true)
     public Page<Book> findAll(Pageable pageable) {
-        return bookRepository.findPageWithAuthorAndGenres(pageable);
+        Page<Long> ids = bookRepository.findIdsPage(pageable);
+        if (ids.isEmpty()) {
+            return new PageImpl<>(List.of(), pageable, 0);
+        }
+        List<Book> books = bookRepository.findByIdIn(ids.getContent());
+
+        Map<Long, Book> byId = books.stream().collect(Collectors.toMap(Book::getId, b -> b));
+        List<Book> ordered = ids.getContent().stream()
+                .map(byId::get)
+                .filter(Objects::nonNull)
+                .toList();
+
+        return new PageImpl<>(ordered, pageable, ids.getTotalElements());
     }
 
     @Override
@@ -72,22 +92,22 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
-    public Book update(long id, String title, long authorId, Set<Long> genresIds) {
+    public Book update(long id, String title, long authorId, Set<Long> genresIds, long expectedVersion) {
         String normalizedTitle = normalizeAndValidateTitle(title);
         requireNonEmptyGenresIds(genresIds);
-
         var book = bookRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Book with id %d not found".formatted(id)));
 
+        if (expectedVersion != book.getVersion()) {
+            throw new ConflictException("Stale version: expected %d but was %d"
+                    .formatted(expectedVersion, book.getVersion()));
+        }
         var author = authorRepository.findById(authorId)
                 .orElseThrow(() -> new NotFoundException("Author with id %d not found".formatted(authorId)));
-
         var genres = findGenresOrThrow(genresIds);
-
         book.setTitle(normalizedTitle);
         book.setAuthor(author);
         book.replaceGenres(genres);
-
         return bookRepository.save(book);
     }
 
@@ -96,7 +116,7 @@ public class BookServiceImpl implements BookService {
     public void deleteById(long id) {
         try {
             bookRepository.deleteById(id);
-        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException(
                     "Book with id %d not found".formatted(id), e);
         }

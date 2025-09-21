@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.otus.hw.models.Book;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,4 +27,11 @@ public interface BookRepository extends JpaRepository<Book, Long> {
             countQuery = "select count(b) from Book b"
     )
     Page<Book> findPageWithAuthorAndGenres(Pageable pageable);
+
+    @Query(value = "select b.id from Book b",
+            countQuery = "select count(b) from Book b")
+    Page<Long> findIdsPage(Pageable pageable);
+
+    @EntityGraph(attributePaths = {"author","genres"})
+    List<Book> findByIdIn(Collection<Long> ids);
 }
