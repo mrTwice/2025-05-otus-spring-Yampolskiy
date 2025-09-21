@@ -17,7 +17,6 @@ import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.dto.CommentForm;
 import ru.otus.hw.dto.PageResponse;
 import ru.otus.hw.mappers.CommentMapper;
-import ru.otus.hw.services.BookService;
 import ru.otus.hw.services.CommentService;
 
 import java.net.URI;
@@ -28,8 +27,6 @@ import java.net.URI;
 public class BookCommentsRestController {
 
     private final CommentService commentService;
-
-    private final BookService bookService;
 
     private final CommentMapper commentMapper;
 

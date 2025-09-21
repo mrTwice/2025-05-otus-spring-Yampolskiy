@@ -7,7 +7,6 @@ export class BookDetailsView extends BaseView {
         const book = await this.app.api.get(`/api/v1/books/${id}`);
         const comments = await this.app.api.get(`/api/v1/books/${id}/comments?page=0&size=100`);
 
-        // захватываем ссылки на api/router, чтобы не дергать window.app
         const api = this.app.api;
         const router = this.app.router;
 

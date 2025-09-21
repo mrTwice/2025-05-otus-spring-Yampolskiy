@@ -3,7 +3,6 @@ import { h } from '../core/dom.js';
 
 export class GenresView extends BaseView {
     async render() {
-        // читаем page/size из hash-параметров
         const qs = location.hash.split('?')[1] || '';
         const params = new URLSearchParams(qs);
         const page = Number(params.get('page') || 0);

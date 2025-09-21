@@ -131,9 +131,12 @@ public class GlobalRestExceptionHandler {
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<Void> handleStatic404(
-            NoResourceFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public ResponseEntity<ProblemDetail> handleStatic404(NoResourceFoundException ex) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        ProblemDetail body = pdf.create(status, ErrorCode.NOT_FOUND.name(),
+                "Page not found: " + ex.getResourcePath(),
+                Map.of("code", ErrorCode.NOT_FOUND.name()));
+        return ResponseEntity.status(status).body(body);
     }
 
 
@@ -153,15 +156,22 @@ public class GlobalRestExceptionHandler {
             String constraintName, String sqlState, String rawMsg) {
 
         HttpStatus status = HttpStatus.CONFLICT;
-        String title = resolveTitle(sqlState, rawMsg);
+        String title = resolveTitle(constraintName, sqlState, rawMsg);
         String detail = resolveDetail(constraintName, rawMsg, title);
 
         ProblemDetail body = pdf.create(status, title, detail, Map.of("code", title));
         return ResponseEntity.status(status).body(body);
     }
 
-    private String resolveTitle(String sqlState, String rawMsg) {
-        if ("23505".equals(sqlState) || containsIgnoreCase(rawMsg, "unique")) {
+    private String resolveTitle(String constraintName, String sqlState, String rawMsg) {
+        String upperMsg = rawMsg == null ? "" : rawMsg.toUpperCase();
+        String upperCn  = constraintName == null ? "" : constraintName.toUpperCase();
+
+        if ("23505".equals(sqlState)
+                || containsIgnoreCase(rawMsg, "unique")
+                || upperMsg.contains("UQ_")
+                || upperCn.contains("UQ_")
+                || upperCn.contains("UNIQUE")) {
             return ErrorCode.DUPLICATE.name();
         }
         return ErrorCode.CONFLICT.name();
