@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class BookDetailsDto {
-    private Long id;
+    private String id;
 
     private String title;
 

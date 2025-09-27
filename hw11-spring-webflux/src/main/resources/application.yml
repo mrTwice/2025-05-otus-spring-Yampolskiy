@@ -1,48 +1,8 @@
-server:
-  address: 127.0.0.1
-  port: 8080
-#  servlet:
-#    context-path: /
-
-
 spring:
-  datasource:
-    url: jdbc:h2:mem:maindb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-    hikari:
-      maximum-pool-size: 5
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/library
+      auto-index-creation: true
 
-  sql:
-    init:
-      mode: never
-
-
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
-    baseline-on-migrate: true
-
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-
-  jpa:
-    open-in-view: false
-    hibernate:
-      ddl-auto: validate
-    properties:
-      hibernate:
-        jdbc:
-          lob:
-            non_contextual_creation: true
-        format_sql: true
-        default_batch_fetch_size: 16
-
-
-logging:
-  level:
-    org.hibernate.SQL: debug
-    org.hibernate.orm.jdbc.bind: trace
+server:
+  port: 8080

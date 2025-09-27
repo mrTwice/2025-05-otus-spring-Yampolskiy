@@ -8,11 +8,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import reactor.core.publisher.Mono;
 import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.dto.CommentForm;
 import ru.otus.hw.dto.PageResponse;
@@ -31,24 +32,28 @@ public class BookCommentsRestController {
     private final CommentMapper commentMapper;
 
     @GetMapping
-    public PageResponse<CommentDto> list(@PathVariable long bookId, Pageable pageable) {
-        return PageResponse.from(
-                commentService.findByBookId(bookId, pageable).map(commentMapper::toDto)
-        );
+    public Mono<PageResponse<CommentDto>> list(@PathVariable String bookId, Pageable pageable) {
+        return commentService.findByBookId(bookId, pageable)
+                .map(page -> PageResponse.from(
+                        page.map(commentMapper::toDto)
+                ));
     }
 
+
     @PostMapping
-    public ResponseEntity<CommentDto> create(@PathVariable long bookId,
-                                             @Validated @RequestBody CommentForm form) {
-        var saved = commentService.insert(bookId, form.getText());
-        var dto = commentMapper.toDto(saved);
-        URI location = URI.create("/api/v1/books/" + bookId + "/comments/" + saved.getId());
-        return ResponseEntity.created(location).body(dto);
+    public Mono<ResponseEntity<CommentDto>> create(@PathVariable String bookId,
+                                                   @Validated @RequestBody CommentForm form) {
+        return commentService.insert(bookId, form.getText())
+                .map(saved -> {
+                    CommentDto dto = commentMapper.toDto(saved);
+                    URI location = URI.create("/api/v1/books/" + bookId + "/comments/" + saved.getId());
+                    return ResponseEntity.created(location).body(dto);
+                });
     }
 
     @DeleteMapping("/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable long bookId, @PathVariable long commentId) {
-        commentService.deleteById(commentId);
+    public Mono<Void> delete(@PathVariable String bookId, @PathVariable String commentId) {
+        return commentService.deleteById(commentId);
     }
 }

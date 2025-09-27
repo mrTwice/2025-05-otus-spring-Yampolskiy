@@ -2,21 +2,22 @@ package ru.otus.hw.services;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.otus.hw.models.Book;
 
-import java.util.List;
 import java.util.Set;
 
 public interface BookService {
-    Book findById(long id);
+    Mono<Book> findById(String id);
 
-    List<Book> findAll();
+    Flux<Book> findAll();
 
-    Book insert(String title, long authorId, Set<Long> genresIds);
+    Mono<Page<Book>> findAll(Pageable pageable);
 
-    Book update(long id, String title, long authorId, Set<Long> genresIds, long expectedVersion);
+    Mono<Book> insert(String title, String authorId, Set<String> genresIds);
 
-    void deleteById(long id);
+    Mono<Book> update(String id, String title, String authorId, Set<String> genresIds, long expectedVersion);
 
-    Page<Book> findAll(Pageable pageable);
+    Mono<Void> deleteById(String id);
 }

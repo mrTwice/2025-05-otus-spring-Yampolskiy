@@ -1,17 +1,16 @@
 package ru.otus.hw.repositories;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.otus.hw.models.Genre;
 
-import java.util.List;
 import java.util.Set;
 
-public interface GenreRepository extends JpaRepository<Genre, Long> {
+public interface GenreRepository extends ReactiveMongoRepository<Genre, String> {
+    Flux<Genre> findByIdIn(Set<String> ids);
 
-    List<Genre> findByIdIn(Set<Long> ids);
+    Mono<Genre> findByName(String name);
 
-    @Override
-    Page<Genre> findAll(Pageable pageable);
+    Mono<Boolean> existsByName(String name);
 }

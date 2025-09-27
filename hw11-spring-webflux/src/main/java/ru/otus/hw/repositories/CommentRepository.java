@@ -1,18 +1,14 @@
 package ru.otus.hw.repositories;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.otus.hw.models.Comment;
 
-import java.util.List;
+public interface CommentRepository extends ReactiveMongoRepository<Comment, String> {
+    Flux<Comment> findByBookIdOrderByCreatedAtDesc(String bookId);
 
-public interface CommentRepository extends JpaRepository<Comment, Long> {
+    Mono<Long> countByBookId(String bookId);
 
-    @EntityGraph(attributePaths = {"book"})
-    List<Comment> findByBookIdOrderByCreatedAtDesc(Long bookId);
-
-    @EntityGraph(attributePaths = {"book"})
-    Page<Comment> findByBookId(Long bookId, Pageable pageable);
+    Mono<Long> deleteByBookId(String bookId);
 }

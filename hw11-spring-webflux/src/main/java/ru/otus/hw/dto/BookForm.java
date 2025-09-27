@@ -20,17 +20,17 @@ import java.util.Set;
 @Builder
 public class BookForm {
 
-    private Long id;
+    private String id;
 
     @NotBlank
     @Size(max = 255)
     private String title;
 
     @NotNull
-    private Long authorId;
+    private String authorId;
 
     @NotEmpty
-    private Set<@NotNull Long> genresIds = new LinkedHashSet<>();
+    private Set<@NotNull String> genresIds = new LinkedHashSet<>();
 
     @Builder.Default
     private long version = 0L;

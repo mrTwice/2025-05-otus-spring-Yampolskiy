@@ -14,12 +14,16 @@ class App {
         this.router = new Router({ defaultHash: '#/books' });
 
         this.router
-            .add(/^#\/books(?:\?.*)?$/,     () => new BooksListView(this).show())
-            .add(/^#\/books\/(\d+)$/,       (id) => new BookDetailsView(this).show(id))
-            .add(/^#\/books\/new$/,         () => new BookFormView(this).show(null))
-            .add(/^#\/books\/(\d+)\/edit$/, (id) => new BookFormView(this).show(id))
-            .add(/^#\/authors$/,            () => new AuthorsView(this).show())
-            .add(/^#\/genres(?:\?.*)?$/,    () => new GenresView(this).show())
+            .add(/^#\/books(?:\?.*)?$/,        () => new BooksListView(this).show())
+
+            .add(/^#\/books\/new$/,            () => new BookFormView(this).show(null))
+
+            .add(/^#\/books\/([^/]+)\/edit$/,  id => new BookFormView(this).show(id))
+
+            .add(/^#\/books\/([^/]+)$/,        id => new BookDetailsView(this).show(id))
+
+            .add(/^#\/authors$/,               () => new AuthorsView(this).show())
+            .add(/^#\/genres(?:\?.*)?$/,       () => new GenresView(this).show())
             .setNotFound((badHash) => {
                 document.title = '404 — Library';
                 const root = h('div', {},

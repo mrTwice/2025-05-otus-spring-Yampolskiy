@@ -14,6 +14,7 @@ import ru.otus.hw.models.Genre;
 public interface GenreMapper {
     GenreDto toDto(Genre source);
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "version", ignore = true)
     Genre toEntity(GenreDto dto);
 }

@@ -1,37 +1,15 @@
 package ru.otus.hw.repositories;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.otus.hw.models.Book;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+public interface BookRepository extends ReactiveMongoRepository<Book, String> {
 
-public interface BookRepository extends JpaRepository<Book, Long> {
+    Flux<Book> findByAuthorId(String authorId);
 
-    @Override
-    @EntityGraph(attributePaths = {"author", "genres"})
-    List<Book> findAll();
+    Mono<Book> findByTitleAndAuthorId(String title, String authorId);
 
-    @EntityGraph(attributePaths = {"author", "genres"})
-    Optional<Book> findById(Long id);
-
-    @Query(
-            value = "select distinct b from Book b " +
-                    "left join fetch b.author " +
-                    "left join fetch b.genres",
-            countQuery = "select count(b) from Book b"
-    )
-    Page<Book> findPageWithAuthorAndGenres(Pageable pageable);
-
-    @Query(value = "select b.id from Book b",
-            countQuery = "select count(b) from Book b")
-    Page<Long> findIdsPage(Pageable pageable);
-
-    @EntityGraph(attributePaths = {"author","genres"})
-    List<Book> findByIdIn(Collection<Long> ids);
+    Mono<Boolean> existsByAuthorId(String authorId);
 }

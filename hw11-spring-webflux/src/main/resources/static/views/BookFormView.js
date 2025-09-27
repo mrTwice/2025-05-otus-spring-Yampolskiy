@@ -47,8 +47,9 @@ export class BookFormView extends BaseView {
             const titleRaw = (form.querySelector('input[name=title]').value ?? '').trim();
             if (!titleRaw) { errorBox.appendChild(showProblem(new ApiError({ title:'VALIDATION', detail:'Название не должно быть пустым' }))); return; }
             const authorRaw = selAuthor.value; if (!authorRaw) { errorBox.appendChild(showProblem(new ApiError({ title:'VALIDATION', detail:'Выберите автора' }))); return; }
-            const authorId = Number(authorRaw);
-            const genresIds = Array.from(selGenres.selectedOptions).map(o => Number(o.value));
+            const authorId = selAuthor.value;
+            const genresIds = Array.from(selGenres.selectedOptions).map(o => o.value);
+
             if (genresIds.length === 0) { errorBox.appendChild(showProblem(new ApiError({ title:'VALIDATION', detail:'Выберите хотя бы один жанр' }))); return; }
 
             const payload = { id: existing?.id ?? null, title: titleRaw, authorId, genresIds, version: existing?.version ?? 0 };

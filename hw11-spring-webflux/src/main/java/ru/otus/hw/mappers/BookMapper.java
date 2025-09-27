@@ -1,81 +1,71 @@
 package ru.otus.hw.mappers;
 
-
-import org.mapstruct.Mapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.ReportingPolicy;
-import org.mapstruct.Mappings;
-import org.mapstruct.Context;
-import org.mapstruct.MappingTarget;
 import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
-import ru.otus.hw.components.AuthorRefResolver;
-import ru.otus.hw.components.GenreRefResolver;
+import org.mapstruct.ReportingPolicy;
 import ru.otus.hw.dto.BookDetailsDto;
 import ru.otus.hw.dto.BookForm;
 import ru.otus.hw.dto.BookListItemDto;
-import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
-
-import java.util.Set;
 import java.util.stream.Collectors;
+import ru.otus.hw.models.Author;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Mapper(
         componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.ERROR,
         unmappedSourcePolicy = ReportingPolicy.IGNORE,
-        uses = {AuthorMapper.class, GenreMapper.class, AuthorRefResolver.class, GenreRefResolver.class}
+        uses = { AuthorMapper.class, GenreMapper.class }
 )
 public interface BookMapper {
 
-    BookDetailsDto toDetailsDto(Book entity);
 
-    @Mappings({
-            @Mapping(target = "authorFullName", source = "author.fullName"),
-            @Mapping(target = "genresSummary", source = "entity", qualifiedByName = "joinGenreNames")
-    })
-    BookListItemDto toListItemDto(Book entity);
+    @Mapping(target = "id",        source = "id")
+    @Mapping(target = "title",     source = "title")
+    @Mapping(target = "authorId",  source = "authorId")
+    @Mapping(target = "genresIds", ignore = true)
+    @Mapping(target = "version",   source = "version")
+    Book fromForm(BookForm form);
 
-    @Mappings({
-            @Mapping(target = "author", source = "authorId", qualifiedByName = "resolveAuthor"),
-            @Mapping(target = "genres", ignore = true)
-    })
-    Book fromForm(BookForm form, @Context AuthorRefResolver authorRef, @Context GenreRefResolver genreRef);
-
-    @Mappings({
-            @Mapping(target = "author", source = "authorId", qualifiedByName = "resolveAuthor"),
-            @Mapping(target = "version", source = "version"),
-            @Mapping(target = "title", source = "title"),
-            @Mapping(target = "genres", ignore = true)
-    })
-    void updateFromForm(BookForm form, @MappingTarget Book target,
-                        @Context AuthorRefResolver authorRef, @Context GenreRefResolver genreRef);
+    @Mapping(target = "title",     source = "title")
+    @Mapping(target = "version",   source = "version")
+    @Mapping(target = "authorId",  source = "authorId")
+    @Mapping(target = "genresIds", ignore = true)
+    void updateFromForm(BookForm form, @MappingTarget Book target);
 
     @AfterMapping
-    default void applyGenres(BookForm form, @MappingTarget Book target, @Context GenreRefResolver genreRef) {
-        Set<Genre> resolved = resolveGenres(form.getGenresIds(), genreRef);
-        target.replaceGenres(resolved);
+    default void copyGenresIdsFromForm(BookForm form, @MappingTarget Book target) {
+        if (form.getGenresIds() != null) {
+            target.setGenresIds(new ArrayList<>(form.getGenresIds()));
+        } else {
+            target.setGenresIds(new ArrayList<>());
+        }
     }
 
-    @Named("resolveAuthor")
-    default Author resolveAuthor(Long id, @Context AuthorRefResolver resolver) {
-        return resolver.byId(id);
-    }
+    @Mapping(target = "id",      source = "book.id")
+    @Mapping(target = "title",   source = "book.title")
+    @Mapping(target = "author",  source = "author")
+    @Mapping(target = "genres",  source = "genres")
+    @Mapping(target = "version", source = "book.version")
+    BookDetailsDto toDetailsDto(Book book, Author author, List<Genre> genres);
 
-    @Named("resolveGenres")
-    default Set<Genre> resolveGenres(Set<Long> ids, @Context GenreRefResolver resolver) {
-        return resolver.byIds(ids);
-    }
+    @Mapping(target = "authorFullName", source = "authorFullName")
+    @Mapping(target = "genresSummary",  source = "genres", qualifiedByName = "joinGenreNames")
+    BookListItemDto toListItemDto(Book book, String authorFullName, List<Genre> genres);
 
     @Named("joinGenreNames")
-    default String joinGenreNames(Book src) {
-        if (src.getGenres() == null || src.getGenres().isEmpty()) {
+    default String joinGenreNames(Collection<Genre> genres) {
+        if (genres == null || genres.isEmpty()) {
             return "";
         }
-        return src.getGenres().stream()
-                .map(Genre::getName)
-                .collect(Collectors.joining(", "));
+        return genres.stream().map(Genre::getName).collect(Collectors.joining(", "));
     }
 }
+

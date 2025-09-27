@@ -14,6 +14,7 @@ import ru.otus.hw.models.Author;
 public interface AuthorMapper {
     AuthorDto toDto(Author source);
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "version", ignore = true)
     Author toEntity(AuthorDto dto);
 }

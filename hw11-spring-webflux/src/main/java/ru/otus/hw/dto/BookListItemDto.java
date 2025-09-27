@@ -12,7 +12,7 @@ import lombok.Builder;
 @AllArgsConstructor
 @Builder
 public class BookListItemDto {
-    private Long id;
+    private String id;
 
     private String title;
 

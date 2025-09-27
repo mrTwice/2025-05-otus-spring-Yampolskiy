@@ -14,11 +14,11 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 public class CommentDto {
-    private Long id;
+    private String id;
 
     private String text;
 
     private Instant createdAt;
 
-    private Long bookId;
+    private String bookId;
 }
