@@ -15,9 +15,13 @@ public class AppUserDetails implements UserDetails {
 
     @Getter
     private final Long id;
+
     private final String username;
+
     private final String passwordHash;
+
     private final boolean enabled;
+
     private final Set<String> roles;
 
     public AppUserDetails(User user) {

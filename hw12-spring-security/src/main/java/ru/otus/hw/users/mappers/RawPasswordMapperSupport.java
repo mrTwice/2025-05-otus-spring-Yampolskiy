@@ -9,7 +9,9 @@ import ru.otus.hw.users.model.User;
 
 public final class RawPasswordMapperSupport {
 
-    private RawPasswordMapperSupport() {}
+    private RawPasswordMapperSupport() {
+
+    }
 
     @AfterMapping
     static void copyRawPassword(UserRegistrationRequest src, @MappingTarget User target) {

@@ -3,7 +3,6 @@ package ru.otus.hw.users.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import ru.otus.hw.exceptions.AssociationViolationException;
 import ru.otus.hw.exceptions.ConflictException;
 import ru.otus.hw.exceptions.DuplicateException;
@@ -20,49 +19,23 @@ import java.util.Set;
 public class UserAdminServiceImpl implements UserAdminService {
 
     private final UserRepository users;
+
     private final UserReadService reader;
 
     @Override
     public User createUser(User userWithHashedPassword) {
-        if (userWithHashedPassword == null) {
-            throw new ValidationException("User is null");
-        }
-        requireText(userWithHashedPassword.getUsername(), "username");
-        requireText(userWithHashedPassword.getEmail(), "email");
-        requireText(userWithHashedPassword.getPasswordHash(), "passwordHash");
-
-        String username = userWithHashedPassword.getUsername();
-        String email = userWithHashedPassword.getEmail().toLowerCase();
-
-        if (users.existsByUsernameIgnoreCase(username)) {
-            throw new DuplicateException("Username already taken: " + username);
-        }
-        if (users.existsByEmailIgnoreCase(email)) {
-            throw new DuplicateException("Email already in use: " + email);
-        }
-
-        userWithHashedPassword.setEmail(email);
-
-        Set<String> roles = normalizeRoles(userWithHashedPassword.getRoles());
-        if (roles.isEmpty()) roles = Set.of("READER");
-        userWithHashedPassword.setRoles(roles);
-
-        try {
-            return users.save(userWithHashedPassword);
-        } catch (Exception e) {
-            throw new ConflictException("Failed to create user", e);
-        }
+        validateNotNull(userWithHashedPassword);
+        normalizeAndValidateFields(userWithHashedPassword);
+        ensureUniqueness(userWithHashedPassword.getUsername(), userWithHashedPassword.getEmail());
+        applyRolesOrDefault(userWithHashedPassword);
+        return saveOrConflict(userWithHashedPassword, "Failed to create user");
     }
 
     @Override
     public User setEnabled(Long userId, boolean enabled) {
         User u = reader.getById(userId);
         u.setEnabled(enabled);
-        try {
-            return users.save(u);
-        } catch (Exception e) {
-            throw new ConflictException("Failed to set enabled=" + enabled + " for id=" + userId, e);
-        }
+        return saveOrConflict(u, "Failed to set enabled=" + enabled + " for id=" + userId);
     }
 
     @Override
@@ -72,11 +45,7 @@ public class UserAdminServiceImpl implements UserAdminService {
         Set<String> rs = new HashSet<>(u.getRoles());
         if (rs.add(norm)) {
             u.setRoles(rs);
-            try {
-                return users.save(u);
-            } catch (Exception e) {
-                throw new ConflictException("Failed to add role '" + norm + "' to id=" + userId, e);
-            }
+            return saveOrConflict(u, "Failed to add role '" + norm + "' to id=" + userId);
         }
         return u;
     }
@@ -90,11 +59,7 @@ public class UserAdminServiceImpl implements UserAdminService {
             throw new ValidationException("Role not assigned: " + norm);
         }
         u.setRoles(rs);
-        try {
-            return users.save(u);
-        } catch (Exception e) {
-            throw new ConflictException("Failed to remove role '" + norm + "' from id=" + userId, e);
-        }
+        return saveOrConflict(u, "Failed to remove role '" + norm + "' from id=" + userId);
     }
 
     @Override
@@ -108,17 +73,58 @@ public class UserAdminServiceImpl implements UserAdminService {
         }
     }
 
+
+    private static void validateNotNull(User u) {
+        if (u == null) {
+            throw new ValidationException("User is null");
+        }
+    }
+
+    private static void normalizeAndValidateFields(User u) {
+        requireText(u.getUsername(), "username");
+        requireText(u.getEmail(), "email");
+        requireText(u.getPasswordHash(), "passwordHash");
+        u.setEmail(u.getEmail().toLowerCase());
+    }
+
+    private void ensureUniqueness(String username, String emailLower) {
+        if (users.existsByUsernameIgnoreCase(username)) {
+            throw new DuplicateException("Username already taken: " + username);
+        }
+        if (users.existsByEmailIgnoreCase(emailLower)) {
+            throw new DuplicateException("Email already in use: " + emailLower);
+        }
+    }
+
+    private static void applyRolesOrDefault(User u) {
+        Set<String> roles = normalizeRoles(u.getRoles());
+        if (roles.isEmpty()) {
+            roles = Set.of("READER");
+        }
+        u.setRoles(roles);
+    }
+
+    private User saveOrConflict(User u, String message) {
+        try {
+            return users.save(u);
+        } catch (Exception e) {
+            throw new ConflictException(message, e);
+        }
+    }
+
     private static void requireText(String v, String field) {
-        if (!StringUtils.hasText(v)) {
+        if (!org.springframework.util.StringUtils.hasText(v)) {
             throw new ValidationException("Field '" + field + "' must not be blank");
         }
     }
 
     private static Set<String> normalizeRoles(Set<String> roles) {
-        if (roles == null || roles.isEmpty()) return Set.of();
+        if (roles == null || roles.isEmpty()) {
+            return Set.of();
+        }
         Set<String> r = new HashSet<>();
         for (String s : roles) {
-            if (StringUtils.hasText(s)) {
+            if (org.springframework.util.StringUtils.hasText(s)) {
                 r.add(normalizeRole(s));
             }
         }

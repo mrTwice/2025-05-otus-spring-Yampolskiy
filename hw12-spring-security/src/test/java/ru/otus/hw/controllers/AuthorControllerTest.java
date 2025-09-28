@@ -3,9 +3,12 @@ package ru.otus.hw.controllers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.library.components.GlobalExceptionHandler;
@@ -24,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 classes = GlobalExceptionHandler.class
         )
 )
+@AutoConfigureMockMvc
 class AuthorControllerTest {
 
     @Autowired
@@ -32,7 +36,11 @@ class AuthorControllerTest {
     @MockitoBean
     private AuthorService authorService;
 
+    @MockitoBean
+    private UserDetailsService userDetailsService;
+
     @Test
+    @WithMockUser
     void shouldReturnAuthorsListViewWithModel() throws Exception {
         var authors = List.of(
                 new Author("Author1"),

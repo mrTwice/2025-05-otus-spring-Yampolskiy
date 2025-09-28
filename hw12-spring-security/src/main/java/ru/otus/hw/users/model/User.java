@@ -55,7 +55,7 @@ public class User {
     @Column(nullable = false)
     private boolean enabled;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),

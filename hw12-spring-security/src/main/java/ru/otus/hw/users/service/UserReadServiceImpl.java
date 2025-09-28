@@ -18,28 +18,33 @@ public class UserReadServiceImpl implements UserReadService {
 
     private final UserRepository users;
 
-    @Override public User getById(Long id) {
+    @Override
+    public User getById(Long id) {
         return users.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found: id=" + id));
     }
 
-    @Override public User getByUsername(String username) {
+    @Override
+    public User getByUsername(String username) {
         return users.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("User not found: " + username));
     }
 
-    @Override public User getByEmail(String email) {
+    @Override
+    public User getByEmail(String email) {
         return users.findByEmail(email.toLowerCase())
                 .orElseThrow(() -> new NotFoundException("User not found: " + email));
     }
 
-    @Override public User getByUsernameOrEmail(String value) {
+    @Override
+    public User getByUsernameOrEmail(String value) {
         String lowered = value.toLowerCase();
         return users.findByUsernameOrEmail(value, lowered)
                 .orElseThrow(() -> new NotFoundException("User not found: " + value));
     }
 
-    @Override public Page<User> getPage(Pageable pageable) {
+    @Override
+    public Page<User> getPage(Pageable pageable) {
         return users.findAll(pageable);
     }
 }

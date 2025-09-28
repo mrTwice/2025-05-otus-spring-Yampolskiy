@@ -16,12 +16,12 @@ import ru.otus.hw.users.repository.UserRepository;
 public class UserAccountServiceImpl implements UserAccountService {
 
     private final UserRepository users;
+
     private final UserReadService reader;
 
     @Override
     public User updateProfile(Long userId, String newUsername, String newEmail) {
         User u = reader.getById(userId);
-
         if (!StringUtils.hasText(newUsername) && !StringUtils.hasText(newEmail)) {
             throw new ValidationException("Nothing to update");
         }
@@ -39,7 +39,6 @@ public class UserAccountServiceImpl implements UserAccountService {
         if (StringUtils.hasText(newUsername)) {
             u.setUsername(newUsername);
         }
-
         try {
             return users.save(u);
         } catch (Exception e) {

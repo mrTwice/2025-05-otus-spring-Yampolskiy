@@ -7,6 +7,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.library.components.GlobalExceptionHandler;
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -40,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 classes = GlobalExceptionHandler.class
         )
 )
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 class CommentControllerTest {
 
     @Autowired
@@ -58,13 +61,18 @@ class CommentControllerTest {
     @MockitoBean
     private CommentMapper commentMapper;
 
+    @MockitoBean
+    private UserDetailsService userDetailsService;
+
 
     @Test
+    @WithMockUser
     void shouldCreateCommentAndRedirectToBookDetails() throws Exception {
         long bookId = 1L;
 
         mockMvc.perform(post("/books/{bookId}/comments", bookId)
                         .param("text", "Great book!")
+                        .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/books/" + bookId));
@@ -73,6 +81,7 @@ class CommentControllerTest {
     }
 
     @Test
+    @WithMockUser
     void shouldReturnDetailsViewOnValidationErrors() throws Exception {
         long bookId = 1L;
 
@@ -100,6 +109,7 @@ class CommentControllerTest {
 
         mockMvc.perform(post("/books/{bookId}/comments", bookId)
                         .param("text", "")
+                        .with(csrf())
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name("book/details"))
@@ -109,11 +119,14 @@ class CommentControllerTest {
     }
 
     @Test
+    @WithMockUser
     void shouldDeleteCommentAndRedirectToBookDetails() throws Exception {
         long bookId = 1L;
         long commentId = 77L;
 
-        mockMvc.perform(post("/books/{bookId}/comments/{commentId}/delete", bookId, commentId))
+        mockMvc.perform(
+                post("/books/{bookId}/comments/{commentId}/delete", bookId, commentId)
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/books/" + bookId));
 

@@ -3,9 +3,12 @@ package ru.otus.hw.controllers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.library.components.GlobalExceptionHandler;
@@ -29,6 +32,7 @@ import java.util.Set;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -40,6 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 classes = GlobalExceptionHandler.class
         )
 )
+@AutoConfigureMockMvc
 class BookControllerTest {
 
     @Autowired
@@ -63,7 +68,11 @@ class BookControllerTest {
     @MockitoBean
     private CommentMapper commentMapper;
 
+    @MockitoBean
+    private UserDetailsService userDetailsService;
+
     @Test
+    @WithMockUser
     void shouldReturnBooksListView() throws Exception {
         // entity
         var author = new Author("Author1");
@@ -81,6 +90,7 @@ class BookControllerTest {
     }
 
     @Test
+    @WithMockUser
     void shouldReturnBookDetails() throws Exception {
         var author = new Author("Author1");
         var genre = new Genre("Drama");
@@ -128,6 +138,7 @@ class BookControllerTest {
     }
 
     @Test
+    @WithMockUser
     void shouldShowCreateForm() throws Exception {
         Mockito.when(authorService.findAll()).thenReturn(List.of(new Author("Author1")));
         Mockito.when(genreService.findAll()).thenReturn(List.of(new Genre("Drama")));
@@ -141,6 +152,7 @@ class BookControllerTest {
     }
 
     @Test
+    @WithMockUser
     void shouldCreateBook() throws Exception {
         Book saved = new Book(10L, "New Book", new Author("Author1"), Set.of(), 0);
         Mockito.when(bookService.insert(eq("New Book"), eq(1L), any())).thenReturn(saved);
@@ -148,12 +160,14 @@ class BookControllerTest {
         mockMvc.perform(post("/books")
                         .param("title", "New Book")
                         .param("authorId", "1")
-                        .param("genresIds", "1"))
+                        .param("genresIds", "1")
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/books/10"));
     }
 
     @Test
+    @WithMockUser
     void shouldUpdateBook() throws Exception {
         Book updated = new Book(10L, "Updated", new Author("Author1"), Set.of(), 0);
         Mockito.when(bookService.update(eq(10L), eq("Updated"), eq(1L), any())).thenReturn(updated);
@@ -161,14 +175,17 @@ class BookControllerTest {
         mockMvc.perform(post("/books/10")
                         .param("title", "Updated")
                         .param("authorId", "1")
-                        .param("genresIds", "1"))
+                        .param("genresIds", "1")
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/books/10"));
     }
 
     @Test
+    @WithMockUser
     void shouldDeleteBook() throws Exception {
-        mockMvc.perform(post("/books/10/delete"))
+        mockMvc.perform(post("/books/10/delete")
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/books"));
 

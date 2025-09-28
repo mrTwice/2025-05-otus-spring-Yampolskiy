@@ -28,7 +28,7 @@ class ModelsCommonTest {
 
     @BeforeAll
     static void setUpAll() {
-        var reflections = new Reflections("ru.otus.hw.models");
+        var reflections = new Reflections("ru.otus.hw");
         entitiesClasses = reflections.getTypesAnnotatedWith(Entity.class);
 
     }

@@ -11,13 +11,16 @@
 
 <div th:if="${param.error}" style="color:#b00020">Неверный логин или пароль</div>
 <div th:if="${param.logout}" style="color:#006400">Вы вышли из системы</div>
+<div th:if="${param.pwdChanged}" style="color:#006400">Пароль изменён. Войдите заново.</div>
+<div th:if="${param.expired}" style="color:#b06500">Сессия истекла. Войдите ещё раз.</div>
+<div th:if="${param.invalid}" style="color:#b06500">Сессия недействительна. Пожалуйста, войдите.</div>
 
 <form th:action="@{/login}" method="post">
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
     <div>
         <label>Логин:
-            <input type="text" name="username" autocomplete="username" required/>
+            <input type="text" name="username" autocomplete="username" required autofocus/>
         </label>
     </div>
     <div>

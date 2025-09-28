@@ -23,8 +23,8 @@ public class AppUserDetailsService implements UserDetailsService {
         try {
             User user = userReadService.getByUsernameOrEmail(nameOrEmail);
             return new AppUserDetails(user);
-        } catch (NotFoundException nf) {
-            throw new UsernameNotFoundException("User not found: " + nameOrEmail, nf);
+        } catch (NotFoundException notFoundException) {
+            throw new UsernameNotFoundException("User not found: " + nameOrEmail, notFoundException);
         } catch (Exception ex) {
             throw new InternalAuthenticationServiceException("Authentication backend error", ex);
         }
