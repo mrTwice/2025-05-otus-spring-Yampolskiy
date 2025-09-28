@@ -9,18 +9,20 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.otus.hw.components.GlobalExceptionHandler;
-import ru.otus.hw.dto.AuthorDto;
-import ru.otus.hw.dto.BookDetailsDto;
-import ru.otus.hw.dto.CommentDto;
-import ru.otus.hw.dto.GenreDto;
-import ru.otus.hw.mappers.BookMapper;
-import ru.otus.hw.mappers.CommentMapper;
-import ru.otus.hw.models.Author;
-import ru.otus.hw.models.Book;
-import ru.otus.hw.models.Genre;
-import ru.otus.hw.services.BookService;
-import ru.otus.hw.services.CommentService;
+import ru.otus.hw.library.components.GlobalExceptionHandler;
+import ru.otus.hw.library.controllers.CommentController;
+import ru.otus.hw.library.dto.AuthorDto;
+import ru.otus.hw.library.dto.BookDetailsDto;
+import ru.otus.hw.library.dto.CommentDto;
+import ru.otus.hw.library.dto.GenreDto;
+import ru.otus.hw.library.mappers.BookMapper;
+import ru.otus.hw.library.mappers.CommentMapper;
+import ru.otus.hw.library.models.Comment;
+import ru.otus.hw.library.models.Author;
+import ru.otus.hw.library.models.Book;
+import ru.otus.hw.library.models.Genre;
+import ru.otus.hw.library.services.BookService;
+import ru.otus.hw.library.services.CommentService;
 
 import java.time.Instant;
 import java.util.List;
@@ -91,9 +93,9 @@ class CommentControllerTest {
         var commentDto = CommentDto.builder()
                 .id(100L).text("Nice").createdAt(Instant.now()).bookId(bookId).build();
         when(commentService.findByBookId(bookId)).thenReturn(List.of(
-                new ru.otus.hw.models.Comment("Nice", book)
+                new Comment("Nice", book)
         ));
-        when(commentMapper.toDto(Mockito.any(ru.otus.hw.models.Comment.class)))
+        when(commentMapper.toDto(Mockito.any(Comment.class)))
                 .thenReturn(commentDto);
 
         mockMvc.perform(post("/books/{bookId}/comments", bookId)

@@ -8,9 +8,10 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.otus.hw.components.GlobalExceptionHandler;
-import ru.otus.hw.models.Author;
-import ru.otus.hw.services.AuthorService;
+import ru.otus.hw.library.components.GlobalExceptionHandler;
+import ru.otus.hw.library.controllers.AuthorController;
+import ru.otus.hw.library.models.Author;
+import ru.otus.hw.library.services.AuthorService;
 
 import java.util.List;
 

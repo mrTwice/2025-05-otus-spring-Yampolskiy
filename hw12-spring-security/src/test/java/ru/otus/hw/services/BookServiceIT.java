@@ -3,9 +3,10 @@ package ru.otus.hw.services;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.otus.hw.models.Genre;
-import ru.otus.hw.repositories.AuthorRepository;
-import ru.otus.hw.repositories.GenreRepository;
+import ru.otus.hw.library.models.Genre;
+import ru.otus.hw.library.repositories.AuthorRepository;
+import ru.otus.hw.library.repositories.GenreRepository;
+import ru.otus.hw.library.services.BookService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

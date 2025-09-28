@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Пользователи</title>
+</head>
+<body>
+<div th:replace="fragments/nav :: topnav"></div>
+
+<h1>Пользователи</h1>
+
+<table border="1" cellpadding="6" cellspacing="0">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Enabled</th>
+        <th>Roles</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="u : ${users}">
+        <td th:text="${u.id}">1</td>
+        <td th:text="${u.username}">user</td>
+        <td th:text="${u.email}">user@ex</td>
+        <td th:text="${u.enabled}">true</td>
+        <td>
+            <span th:each="r : ${u.roles}" th:text="${r}" style="margin-right:6px">READER</span>
+        </td>
+        <td>
+            <form th:action="@{|/users/${u.id}/enable|}" method="post" style="display:inline">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="hidden" name="enabled" th:value="${!u.enabled}"/>
+                <button type="submit" th:text="${u.enabled} ? 'Disable' : 'Enable'">Enable</button>
+            </form>
+
+            <!-- Добавить роль -->
+            <form th:action="@{|/users/${u.id}/roles/add|}" method="post" style="display:inline;margin-left:4px">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <select name="role">
+                    <option>READER</option>
+                    <option>ADMIN</option>
+                </select>
+                <button type="submit">Add role</button>
+            </form>
+
+            <!-- Удалить роль -->
+            <form th:action="@{|/users/${u.id}/roles/remove|}" method="post" style="display:inline;margin-left:4px">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <select name="role">
+                    <option>READER</option>
+                    <option>ADMIN</option>
+                </select>
+                <button type="submit">Remove role</button>
+            </form>
+
+            <!-- Удаление -->
+            <form th:action="@{|/users/${u.id}/delete|}" method="post" style="display:inline;margin-left:4px"
+                  onsubmit="return confirm('Удалить пользователя ' + /*[[${u.username}]]*/ '' + '?')">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit">Delete</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

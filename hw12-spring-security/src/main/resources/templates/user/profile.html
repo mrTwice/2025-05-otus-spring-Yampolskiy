@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Профиль</title>
+</head>
+<body>
+<div th:replace="fragments/nav :: topnav"></div>
+
+<h1>Профиль</h1>
+
+<div>
+    <b>ID:</b> <span th:text="${user.id}">1</span><br/>
+    <b>Username:</b> <span th:text="${user.username}">user</span><br/>
+    <b>Email:</b> <span th:text="${user.email}">user@ex</span><br/>
+    <b>Enabled:</b> <span th:text="${user.enabled}">true</span><br/>
+    <b>Roles:</b>
+    <span th:each="r : ${user.roles}" th:text="${r}" style="margin-right:6px">READER</span><br/>
+    <a href="/profile/edit">Редактировать профиль</a>
+</div>
+
+<hr/>
+
+<h2>Смена пароля</h2>
+<form th:action="@{/profile/password}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <label>Текущий пароль:
+        <input type="password" name="currentPassword" autocomplete="current-password"/>
+    </label><br/>
+    <label>Новый пароль:
+        <input type="password" name="newPassword" autocomplete="new-password" required minlength="8"/>
+    </label><br/>
+    <label>Повторите пароль:
+        <input type="password" name="confirmPassword" autocomplete="new-password" required minlength="8"/>
+    </label><br/>
+    <button type="submit">Сменить пароль</button>
+</form>
+
+</body>
+</html>

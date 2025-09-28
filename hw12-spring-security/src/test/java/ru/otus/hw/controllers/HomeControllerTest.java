@@ -6,7 +6,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.otus.hw.components.GlobalExceptionHandler;
+import ru.otus.hw.library.components.GlobalExceptionHandler;
+import ru.otus.hw.library.controllers.HomeController;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

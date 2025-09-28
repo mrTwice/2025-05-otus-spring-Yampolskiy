@@ -3,9 +3,11 @@ package ru.otus.hw.services;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.otus.hw.models.Book;
-import ru.otus.hw.repositories.AuthorRepository;
-import ru.otus.hw.repositories.GenreRepository;
+import ru.otus.hw.library.models.Book;
+import ru.otus.hw.library.repositories.AuthorRepository;
+import ru.otus.hw.library.repositories.GenreRepository;
+import ru.otus.hw.library.services.BookService;
+import ru.otus.hw.library.services.CommentService;
 
 import java.util.Set;
 

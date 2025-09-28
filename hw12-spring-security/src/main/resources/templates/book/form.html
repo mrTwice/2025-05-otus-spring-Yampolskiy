@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><title th:text="${form.id} != null ? 'Редактирование книги' : 'Новая книга'">Книга</title></head>
+<head>
+    <title th:text="${form.id} != null ? 'Редактирование книги' : 'Новая книга'">Книга</title>
+</head>
 <body>
 <div th:replace="~{fragments/nav :: topnav}"></div>
 
@@ -9,6 +11,7 @@
 <form th:action="${form.id} != null ? @{|/books/${form.id}|} : @{/books}" th:object="${form}" method="post">
     <input type="hidden" th:field="*{id}"/>
     <input type="hidden" th:field="*{version}"/>
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
     <div>
         <label for="title">Название</label>
