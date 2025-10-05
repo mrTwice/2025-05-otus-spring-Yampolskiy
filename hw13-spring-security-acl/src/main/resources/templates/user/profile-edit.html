@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Редактирование профиля</title>
+</head>
+<body>
+<div th:insert="~{fragments/nav :: topnav}"></div>
+
+<h1>Редактирование профиля</h1>
+
+<form th:action="@{/profile}" method="post" th:object="${form}">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+    <div>
+        <label>Username:
+            <input type="text" th:field="*{username}" minlength="3" maxlength="64"/>
+        </label>
+        <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Ошибка</div>
+    </div>
+    <div>
+        <label>Email:
+            <input type="email" th:field="*{email}"/>
+        </label>
+        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Ошибка</div>
+    </div>
+
+    <button type="submit">Сохранить</button>
+    <a href="/profile">Отмена</a>
+</form>
+
+</body>
+</html>
