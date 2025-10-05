@@ -38,8 +38,8 @@ class CommentServiceIT {
 
         Book b = bookService.insert("B", authorId, Set.of(g1));
 
-        var c1 = commentService.insert(b.getId(), "c1");
-        var c2 = commentService.insert(b.getId(), "c2");
+        var c1 = commentService.insert(b.getId(), authorId, "c1");
+        var c2 = commentService.insert(b.getId(), authorId, "c2");
 
         var list = commentService.findByBookId(b.getId());
 

@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -24,6 +25,7 @@ import ru.otus.hw.library.services.AuthorService;
 import ru.otus.hw.library.services.BookService;
 import ru.otus.hw.library.services.CommentService;
 import ru.otus.hw.library.services.GenreService;
+import ru.otus.hw.security.config.SecurityConfig;
 
 import java.time.Instant;
 import java.util.List;
@@ -45,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         )
 )
 @AutoConfigureMockMvc
+@Import(SecurityConfig.class)
 class BookControllerTest {
 
     @Autowired
@@ -137,7 +140,7 @@ class BookControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void shouldShowCreateForm() throws Exception {
         Mockito.when(authorService.findAll()).thenReturn(List.of(new Author("Author1")));
         Mockito.when(genreService.findAll()).thenReturn(List.of(new Genre("Drama")));
@@ -151,7 +154,7 @@ class BookControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void shouldCreateBook() throws Exception {
         Book saved = new Book(10L, "New Book", new Author("Author1"), Set.of(), 0);
         Mockito.when(bookService.insert(eq("New Book"), eq(1L), any())).thenReturn(saved);
@@ -166,7 +169,7 @@ class BookControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void shouldUpdateBook() throws Exception {
         Book updated = new Book(10L, "Updated", new Author("Author1"), Set.of(), 0);
         Mockito.when(bookService.update(eq(10L), eq("Updated"), eq(1L), any())).thenReturn(updated);
@@ -181,7 +184,7 @@ class BookControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void shouldDeleteBook() throws Exception {
         mockMvc.perform(post("/books/10/delete")
                         .with(csrf()))
@@ -190,4 +193,5 @@ class BookControllerTest {
 
         Mockito.verify(bookService).deleteById(10L);
     }
+
 }

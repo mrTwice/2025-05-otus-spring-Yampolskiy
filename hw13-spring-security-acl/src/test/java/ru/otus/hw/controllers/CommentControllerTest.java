@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -25,14 +26,15 @@ import ru.otus.hw.library.models.Book;
 import ru.otus.hw.library.models.Genre;
 import ru.otus.hw.library.services.BookService;
 import ru.otus.hw.library.services.CommentService;
+import ru.otus.hw.security.config.SecurityConfig;
+import ru.otus.hw.security.model.AppUserDetails;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -44,6 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         )
 )
 @AutoConfigureMockMvc
+@Import(SecurityConfig.class)
 class CommentControllerTest {
 
     @Autowired
@@ -66,18 +69,24 @@ class CommentControllerTest {
 
 
     @Test
-    @WithMockUser
     void shouldCreateCommentAndRedirectToBookDetails() throws Exception {
-        long bookId = 1L;
+        AppUserDetails me = new AppUserDetails(
+                2L,
+                "user",
+                "password",
+                true,
+                Set.of("ROLE_USER")
+        );
 
-        mockMvc.perform(post("/books/{bookId}/comments", bookId)
+        mockMvc.perform(post("/books/{bookId}/comments", 1L)
                         .param("text", "Great book!")
-                        .with(csrf())
-                )
+                        .with(user(me))
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/books/" + bookId));
+                .andExpect(redirectedUrl("/books/1"));
 
-        Mockito.verify(commentService).insert(bookId, "Great book!");
+        verify(commentService).insert(1L, 2L, "Great book!");
+
     }
 
     @Test
@@ -119,7 +128,7 @@ class CommentControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void shouldDeleteCommentAndRedirectToBookDetails() throws Exception {
         long bookId = 1L;
         long commentId = 77L;
@@ -130,6 +139,6 @@ class CommentControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/books/" + bookId));
 
-        Mockito.verify(commentService).deleteById(commentId);
+        verify(commentService).deleteById(commentId);
     }
 }

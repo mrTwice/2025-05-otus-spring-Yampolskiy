@@ -10,10 +10,8 @@ import ru.otus.hw.exceptions.NotFoundException;
 import ru.otus.hw.exceptions.ValidationException;
 import ru.otus.hw.library.models.Comment;
 import ru.otus.hw.library.models.Book;
-import ru.otus.hw.library.repositories.BookRepository;
 import ru.otus.hw.library.repositories.CommentRepository;
 import ru.otus.hw.users.model.User;
-import ru.otus.hw.users.repository.UserRepository;
 import ru.otus.hw.users.service.UserReadService;
 
 import java.util.List;

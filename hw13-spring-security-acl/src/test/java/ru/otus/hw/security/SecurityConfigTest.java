@@ -58,7 +58,7 @@ class SecurityConfigTest {
     }
 
     @Test
-    @WithUserDetails(value = "reader", userDetailsServiceBeanName = "appUserDetailsService")
+    @WithUserDetails(value = "user", userDetailsServiceBeanName = "appUserDetailsService")
     void shouldAllowProfileForAuthenticated() throws Exception {
         mockMvc.perform(get("/profile"))
                 .andExpect(status().isOk());

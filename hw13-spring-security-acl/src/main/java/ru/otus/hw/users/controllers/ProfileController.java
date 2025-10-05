@@ -1,7 +1,5 @@
 package ru.otus.hw.users.controllers;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.context.request.ServletWebRequest;
 import ru.otus.hw.security.model.AppUserDetails;
 import ru.otus.hw.security.service.SessionKiller;
 import ru.otus.hw.users.dto.ChangePasswordRequest;
@@ -75,10 +74,9 @@ public class ProfileController {
     public String changePassword(
             @AuthenticationPrincipal AppUserDetails me,
             @Valid @ModelAttribute("req") ChangePasswordRequest req,
-            HttpServletRequest request,
-            HttpServletResponse response,
+            BindingResult binding,
             Authentication authentication,
-            BindingResult binding
+            ServletWebRequest webRequest
     ) {
 
         if (binding.hasErrors()) {
@@ -89,9 +87,22 @@ public class ProfileController {
                 me.getId(),
                 req.currentPassword(),
                 req.newPassword(),
-                req.confirmPassword());
-        sessionKiller.expireOnPasswordChange(me.getUsername(), request, response, authentication);
+                req.confirmPassword()
+        );
+
+        sessionKiller.expireOnPasswordChange(
+                me.getUsername(),
+                webRequest.getRequest(),
+                webRequest.getResponse(),
+                authentication
+        );
         return "redirect:/login?pwdChanged";
     }
+
+    @ModelAttribute("user")
+    public User currentUser(@AuthenticationPrincipal AppUserDetails me) {
+        return me != null ? userReadService.getById(me.getId()) : null;
+    }
+
 }
 
