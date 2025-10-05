@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title th:text="${book.title}">Книга</title></head>
+<body>
+<th:block th:insert="~{fragments/nav :: topnav}"></th:block>
+
+<h1 th:text="${book.title}">Название</h1>
+<p><b>Автор:</b> <span th:text="${book.author.fullName}">Автор</span></p>
+<p><b>Жанры:</b>
+    <span th:each="g, stat : ${book.genres}">
+        <span th:text="${g.name}">Genre</span><span th:if="${!stat.last}">, </span>
+    </span>
+</p>
+
+<p>
+    <a th:href="@{|/books/${book.id}/edit|}">Редактировать</a>
+<form th:action="@{|/books/${book.id}/delete|}" method="post" style="display:inline">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <button type="submit">Удалить</button>
+</form>
+</p>
+
+<hr/>
+<h2>Комментарии</h2>
+
+<div th:if="${#lists.isEmpty(comments)}">Пока нет комментариев</div>
+<ul th:if="${!#lists.isEmpty(comments)}">
+    <li th:each="c : ${comments}">
+        <div>
+            <span th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">date</span> —
+            <span th:text="${c.text}">text</span>
+            <form th:action="@{|/books/${book.id}/comments/${c.id}/delete|}" method="post" style="display:inline">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit">Удалить</button>
+            </form>
+        </div>
+    </li>
+</ul>
+
+<h3>Добавить комментарий</h3>
+<form th:action="@{|/books/${book.id}/comments|}" method="post" th:object="${commentForm}">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <textarea th:field="*{text}" rows="3" cols="60" maxlength="2048"></textarea><br/>
+    <div th:if="${#fields.hasErrors('text')}" th:errors="*{text}"></div>
+    <button type="submit">Добавить</button>
+</form>
+
+</body>
+</html>
