@@ -9,6 +9,20 @@
 
 <h1>Пользователи</h1>
 
+<div th:if="${param.error}" style="color:red; margin-bottom: 1em;">
+    <p th:switch="${param.error}">
+        <span th:case="'selfDeleteForbidden'">Нельзя удалить самого себя.</span>
+        <span th:case="'selfDisableForbidden'">Нельзя отключить самого себя.</span>
+        <span th:case="'selfAdminRemovalForbidden'">Нельзя снять с себя роль ADMIN.</span>
+        <span th:case="*">Неизвестная ошибка.</span>
+    </p>
+</div>
+
+<div th:if="${param.ok}" style="color:green; margin-bottom: 1em;">
+    <p>Операция выполнена успешно.</p>
+</div>
+
+
 <table border="1" cellpadding="6" cellspacing="0">
     <thead>
     <tr>

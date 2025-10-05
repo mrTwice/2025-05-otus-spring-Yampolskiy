@@ -13,9 +13,9 @@ public interface CommentService {
 
     Page<Comment> findByBookId(long bookId, Pageable page);
 
-    Comment insert(long bookId, String text);
-
     Comment update(long id, String text);
 
     void deleteById(long id);
+
+    Comment insert(long bookId, long authorUserId, String text);
 }

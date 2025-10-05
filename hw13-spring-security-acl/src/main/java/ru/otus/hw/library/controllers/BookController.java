@@ -2,6 +2,7 @@ package ru.otus.hw.library.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -67,6 +68,7 @@ public class BookController {
     }
 
     @GetMapping("/new")
+    @PreAuthorize("hasRole('ADMIN')")
     public String createForm(Model model) {
         model.addAttribute("form", new BookForm());
         prepareRefs(model);
@@ -74,6 +76,7 @@ public class BookController {
     }
 
     @GetMapping("/{id}/edit")
+    @PreAuthorize("hasRole('ADMIN')")
     public String editForm(@PathVariable long id, Model model) {
         Book book = bookService.findById(id);
 
@@ -93,7 +96,11 @@ public class BookController {
     }
 
     @PostMapping
-    public String create(@Valid @ModelAttribute("form") BookForm form, BindingResult binding, Model model) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public String create(
+            @Valid @ModelAttribute("form") BookForm form,
+            BindingResult binding, Model model
+    ) {
         if (binding.hasErrors()) {
             prepareRefs(model);
             return "book/form";
@@ -103,8 +110,13 @@ public class BookController {
     }
 
     @PostMapping("/{id}")
-    public String update(@PathVariable long id,
-                         @Valid @ModelAttribute("form") BookForm form, BindingResult binding, Model model) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public String update(
+            @PathVariable long id,
+            @Valid @ModelAttribute("form") BookForm form,
+            BindingResult binding,
+            Model model
+    ) {
         if (binding.hasErrors()) {
             prepareRefs(model);
             return "book/form";
@@ -114,6 +126,7 @@ public class BookController {
     }
 
     @PostMapping("/{id}/delete")
+    @PreAuthorize("hasRole('ADMIN')")
     public String delete(@PathVariable long id) {
         bookService.deleteById(id);
         return "redirect:/books";

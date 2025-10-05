@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import ru.otus.hw.library.models.Author;
 import ru.otus.hw.library.models.Book;
 
 import java.util.List;
@@ -26,4 +27,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
             countQuery = "select count(b) from Book b"
     )
     Page<Book> findPageWithAuthorAndGenres(Pageable pageable);
+
+    Optional<Book> findByAuthorAndTitle(Author author, String title);
 }

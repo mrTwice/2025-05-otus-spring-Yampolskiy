@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head><title>Книги</title></head>
 <body>
 <div th:insert="~{fragments/nav :: topnav}"></div>
 <h1>Список книг</h1>
-<p><a th:href="@{/books/new}">Добавить книгу</a></p>
+
+<p sec:authorize="hasRole('ADMIN')">
+    <a th:href="@{/books/new}">Добавить книгу</a>
+</p>
 
 <table>
     <thead>
@@ -17,11 +20,13 @@
         <td th:text="${b.authorFullName}">Author</td>
         <td th:text="${b.genresSummary}">Genres</td>
         <td>
-            <a th:href="@{|/books/${b.id}/edit|}">Редактировать</a>
-            <form th:action="@{|/books/${b.id}/delete|}" method="post" style="display:inline">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                <button type="submit">Удалить</button>
-            </form>
+            <span sec:authorize="hasRole('ADMIN')">
+        <a th:href="@{|/books/${b.id}/edit|}">Редактировать</a>
+        <form th:action="@{|/books/${b.id}/delete|}" method="post" style="display:inline">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <button type="submit">Удалить</button>
+        </form>
+      </span>
         </td>
     </tr>
     </tbody>

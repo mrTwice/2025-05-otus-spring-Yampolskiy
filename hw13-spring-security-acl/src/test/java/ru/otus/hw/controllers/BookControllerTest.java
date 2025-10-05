@@ -74,7 +74,6 @@ class BookControllerTest {
     @Test
     @WithMockUser
     void shouldReturnBooksListView() throws Exception {
-        // entity
         var author = new Author("Author1");
         var book = new Book(1L, "Book1", author, Set.of(), 0L);
         Mockito.when(bookService.findAll()).thenReturn(List.of(book));
@@ -118,7 +117,7 @@ class BookControllerTest {
 
         Mockito.when(bookMapper.toDetailsDto(book)).thenReturn(detailsDto);
 
-        var commentEntity = new Comment("Nice", book); // если у тебя есть такой конструктор
+        var commentEntity = new Comment("Nice", book);
         Mockito.when(commentService.findByBookId(1L)).thenReturn(List.of(commentEntity));
 
         var commentDto = CommentDto.builder()

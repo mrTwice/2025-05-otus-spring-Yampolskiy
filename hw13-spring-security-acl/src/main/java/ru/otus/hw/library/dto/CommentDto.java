@@ -21,4 +21,8 @@ public class CommentDto {
     private Instant createdAt;
 
     private Long bookId;
+
+    private Long authorId;
+
+    private String authorUsername;
 }

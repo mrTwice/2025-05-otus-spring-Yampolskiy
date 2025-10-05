@@ -9,8 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.NotFoundException;
 import ru.otus.hw.exceptions.ValidationException;
 import ru.otus.hw.library.models.Comment;
+import ru.otus.hw.library.models.Book;
 import ru.otus.hw.library.repositories.BookRepository;
 import ru.otus.hw.library.repositories.CommentRepository;
+import ru.otus.hw.users.model.User;
+import ru.otus.hw.users.repository.UserRepository;
+import ru.otus.hw.users.service.UserReadService;
 
 import java.util.List;
 
@@ -20,7 +24,9 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
 
-    private final BookRepository bookRepository;
+    private final BookService bookService;
+
+    private final UserReadService userReadService;
 
     @Override
     @Transactional(readOnly = true)
@@ -39,19 +45,6 @@ public class CommentServiceImpl implements CommentService {
     @Transactional(readOnly = true)
     public Page<Comment> findByBookId(long bookId, Pageable page) {
         return commentRepository.findByBookId(bookId, page);
-    }
-
-    @Override
-    @Transactional
-    public Comment insert(long bookId, String text) {
-        String normalized = normalizeAndValidateText(text);
-
-        var book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new NotFoundException(
-                        "Book with id %d not found".formatted(bookId)));
-
-        var comment = new Comment(normalized, book);
-        return commentRepository.save(comment);
     }
 
     @Override
@@ -78,6 +71,16 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
+    @Override
+    @Transactional
+    public Comment insert(long bookId, long authorUserId, String text) {
+        Book book = bookService.findById(bookId);
+        User user = userReadService.getById(authorUserId);
+
+        String normalized = normalizeAndValidateText(text);
+        var comment = new Comment(normalized, book, user);
+        return commentRepository.save(comment);
+    }
 
     private String normalizeAndValidateText(String text) {
         if (text == null) {

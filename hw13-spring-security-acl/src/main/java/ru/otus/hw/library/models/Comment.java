@@ -20,6 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
+import ru.otus.hw.users.model.User;
 
 import java.time.Instant;
 
@@ -52,6 +53,10 @@ public class Comment {
     @NotNull
     private Book book;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User author;
+
     @Version
     @Column(name = "version", nullable = false)
     private long version;
@@ -59,6 +64,12 @@ public class Comment {
     public Comment(String text, Book book) {
         this.text = text;
         this.book = book;
+    }
+
+    public Comment(String text, Book book, User author) {
+        this.text = text;
+        this.book = book;
+        this.author = author;
     }
 
     @PrePersist

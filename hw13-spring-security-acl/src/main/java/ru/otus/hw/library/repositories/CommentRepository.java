@@ -10,9 +10,9 @@ import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    @EntityGraph(attributePaths = {"book"})
+    @EntityGraph(attributePaths = {"book", "author"})
     List<Comment> findByBookIdOrderByCreatedAtDesc(Long bookId);
 
-    @EntityGraph(attributePaths = {"book"})
+    @EntityGraph(attributePaths = {"book", "author"})
     Page<Comment> findByBookId(Long bookId, Pageable pageable);
 }

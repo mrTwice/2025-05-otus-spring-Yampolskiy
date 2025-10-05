@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ru.otus.hw.library.models.Genre;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface GenreRepository extends JpaRepository<Genre, Long> {
@@ -14,4 +15,6 @@ public interface GenreRepository extends JpaRepository<Genre, Long> {
 
     @Override
     Page<Genre> findAll(Pageable pageable);
+
+    Optional<Genre> findByName(String name);
 }

@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -22,6 +23,7 @@ import ru.otus.hw.users.service.AccountPasswordService;
 import ru.otus.hw.users.service.UserAccountService;
 import ru.otus.hw.users.service.UserReadService;
 
+@PreAuthorize("isAuthenticated()")
 @Controller
 @AllArgsConstructor
 @RequestMapping("/profile")
@@ -36,7 +38,10 @@ public class ProfileController {
     private final SessionKiller sessionKiller;
 
     @GetMapping
-    public String view(@AuthenticationPrincipal AppUserDetails me, Model model) {
+    public String view(
+            @AuthenticationPrincipal AppUserDetails me,
+            Model model
+    ) {
         User user = userReadService.getById(me.getId());
         model.addAttribute("user", user);
         return "user/profile";
@@ -72,8 +77,14 @@ public class ProfileController {
             @Valid @ModelAttribute("req") ChangePasswordRequest req,
             HttpServletRequest request,
             HttpServletResponse response,
-            Authentication authentication
+            Authentication authentication,
+            BindingResult binding
     ) {
+
+        if (binding.hasErrors()) {
+            return "user/profile";
+        }
+
         accountPasswordService.changePassword(
                 me.getId(),
                 req.currentPassword(),
