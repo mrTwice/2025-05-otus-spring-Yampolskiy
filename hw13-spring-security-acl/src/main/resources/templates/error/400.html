@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>400 Bad Request</title><meta charset="UTF-8"/></head>
+<body>
+<h1>Некорректный запрос</h1>
+<p th:text="${message} ?: 'Проверьте введённые параметры.'">Проверьте введённые параметры.</p>
+<p><a th:href="@{/}">На главную</a></p>
+</body>
+</html>
