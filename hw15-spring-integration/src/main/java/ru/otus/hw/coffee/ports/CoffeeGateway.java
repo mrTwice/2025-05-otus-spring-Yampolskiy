@@ -2,11 +2,11 @@ package ru.otus.hw.coffee.ports;
 
 import org.springframework.integration.annotation.Gateway;
 import org.springframework.integration.annotation.MessagingGateway;
-import org.springframework.messaging.Message;
+import ru.otus.hw.coffee.config.ChannelsConfig;
 import ru.otus.hw.coffee.domain.Order;
 
 @MessagingGateway
-public interface OrderGateway {
-    @Gateway(requestChannel = "orders.input")
-    Message<Order> placeOrder(Order order);
+public interface CoffeeGateway {
+    @Gateway(requestChannel = ChannelsConfig.CH_ORDERS_IN)
+    void placeOrder(Order order);
 }

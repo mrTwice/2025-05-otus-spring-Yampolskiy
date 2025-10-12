@@ -7,15 +7,15 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import ru.otus.hw.coffee.config.CoffeeProperties;
 import ru.otus.hw.coffee.domain.Beverage;
 import ru.otus.hw.coffee.domain.Order;
-import ru.otus.hw.coffee.ports.OrderGateway;
+import ru.otus.hw.coffee.ports.CoffeeGateway;
 
 @SpringBootApplication
 @EnableConfigurationProperties(CoffeeProperties.class)
 public class CoffeeApplication implements CommandLineRunner {
 
-    private final OrderGateway gateway;
+    private final CoffeeGateway gateway;
 
-    public CoffeeApplication(OrderGateway gateway) {
+    public CoffeeApplication(CoffeeGateway gateway) {
         this.gateway = gateway;
     }
 
