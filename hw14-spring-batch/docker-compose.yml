@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: pg-library
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: library
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      TZ: Europe/Moscow
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d library"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mongo:
+    image: mongo:7
+    container_name: mongo-library
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval \"db.adminCommand('ping')\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pg_data:
+  mongo_data:
