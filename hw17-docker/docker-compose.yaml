@@ -1,0 +1,14 @@
+services:
+  library:
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NO_CACHE=true
+    image: library:latest
+    container_name: library
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "8080:8080"
