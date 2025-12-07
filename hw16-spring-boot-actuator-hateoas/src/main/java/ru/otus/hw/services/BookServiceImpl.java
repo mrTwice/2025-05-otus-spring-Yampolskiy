@@ -2,8 +2,6 @@ package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.AssociationViolationException;
@@ -42,12 +40,6 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     public List<Book> findAll() {
         return bookRepository.findAll();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<Book> findAll(Pageable pageable) {
-        return bookRepository.findPageWithAuthorAndGenres(pageable);
     }
 
     @Override

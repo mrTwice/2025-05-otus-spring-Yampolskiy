@@ -1,15 +1,18 @@
 package ru.otus.hw.repositories;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import ru.otus.hw.models.Book;
 
 import java.util.List;
 import java.util.Optional;
 
+@RepositoryRestResource(
+        collectionResourceRel = "books",
+        itemResourceRel = "book",
+        path = "books"
+)
 public interface BookRepository extends JpaRepository<Book, Long> {
 
     @Override
@@ -18,12 +21,4 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     @EntityGraph(attributePaths = {"author", "genres"})
     Optional<Book> findById(Long id);
-
-    @Query(
-            value = "select distinct b from Book b " +
-                    "left join fetch b.author " +
-                    "left join fetch b.genres",
-            countQuery = "select count(b) from Book b"
-    )
-    Page<Book> findPageWithAuthorAndGenres(Pageable pageable);
 }
