@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -17,7 +18,6 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -27,20 +27,18 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/login", "/register", "/h2-console/**")
                         .permitAll()
                         .requestMatchers("/users/**").hasRole("ADMIN")
-                        .requestMatchers("/profile/**").authenticated()
-                        .anyRequest()
-                        .authenticated())
-                .formLogin(f -> f.loginPage("/login").permitAll()).logout(l -> l
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
-                        .invalidateHttpSession(true)
-                        .clearAuthentication(true)
-                        .deleteCookies("JSESSIONID")
-                        .permitAll())
+                        .requestMatchers(HttpMethod.GET, "/books/new", "/books/*/edit").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/books", "/books/*", "/books/*/delete").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/books/*/comments").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/books/*/comments/*/delete").hasRole("ADMIN")
+                        .requestMatchers("/profile/**").authenticated().anyRequest().authenticated()
+                )
+                .formLogin(f -> f.loginPage("/login").permitAll())
+                .logout(l -> l
+                        .logoutUrl("/logout").logoutSuccessUrl("/login?logout").invalidateHttpSession(true)
+                        .clearAuthentication(true).deleteCookies("JSESSIONID").permitAll())
                 .sessionManagement(sm -> sm
-                        .invalidSessionUrl("/login?invalid")
-                        .maximumSessions(-1)
-                        .sessionRegistry(sessionRegistry())
+                        .invalidSessionUrl("/login?invalid").maximumSessions(-1).sessionRegistry(sessionRegistry())
                         .expiredUrl("/login?expired"));
         return http.build();
     }

@@ -2,7 +2,6 @@ package ru.otus.hw.users.controllers;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -22,7 +21,6 @@ import ru.otus.hw.users.service.AccountPasswordService;
 import ru.otus.hw.users.service.UserAccountService;
 import ru.otus.hw.users.service.UserReadService;
 
-@PreAuthorize("isAuthenticated()")
 @Controller
 @AllArgsConstructor
 @RequestMapping("/profile")

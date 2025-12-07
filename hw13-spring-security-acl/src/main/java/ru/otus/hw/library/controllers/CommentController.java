@@ -2,7 +2,6 @@ package ru.otus.hw.library.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +31,6 @@ public class CommentController {
     private final CommentMapper commentMapper;
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
     public String create(
             @PathVariable long bookId,
             @Valid @ModelAttribute("commentForm") CommentForm form,
@@ -55,7 +53,6 @@ public class CommentController {
     }
 
     @PostMapping("/{commentId}/delete")
-    @PreAuthorize("hasRole('ADMIN')")
     public String delete(
             @PathVariable long bookId,
             @PathVariable long commentId
