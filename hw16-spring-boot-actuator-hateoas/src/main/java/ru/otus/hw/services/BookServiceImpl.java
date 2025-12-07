@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.components.BookMetrics;
 import ru.otus.hw.exceptions.AssociationViolationException;
 import ru.otus.hw.exceptions.NotFoundException;
 import ru.otus.hw.exceptions.ValidationException;
@@ -28,6 +29,8 @@ public class BookServiceImpl implements BookService {
     private final GenreRepository genreRepository;
 
     private final BookRepository bookRepository;
+
+    private final BookMetrics bookMetrics;
 
     @Override
     @Transactional(readOnly = true)
@@ -57,8 +60,9 @@ public class BookServiceImpl implements BookService {
         book.setTitle(normalizedTitle);
         book.setAuthor(author);
         book.replaceGenres(genres);
-
-        return bookRepository.save(book);
+        Book saved = bookRepository.save(book);
+        bookMetrics.incrementCreated();
+        return saved;
     }
 
 
@@ -88,6 +92,7 @@ public class BookServiceImpl implements BookService {
     public void deleteById(long id) {
         try {
             bookRepository.deleteById(id);
+            bookMetrics.incrementDeleted();
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             throw new NotFoundException(
                     "Book with id %d not found".formatted(id), e);
