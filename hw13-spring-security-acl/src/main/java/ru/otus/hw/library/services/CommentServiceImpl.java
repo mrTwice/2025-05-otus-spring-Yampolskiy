@@ -1,0 +1,97 @@
+package ru.otus.hw.library.services;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.exceptions.NotFoundException;
+import ru.otus.hw.exceptions.ValidationException;
+import ru.otus.hw.library.models.Comment;
+import ru.otus.hw.library.models.Book;
+import ru.otus.hw.library.repositories.CommentRepository;
+import ru.otus.hw.users.model.User;
+import ru.otus.hw.users.service.UserReadService;
+
+import java.util.List;
+
+@RequiredArgsConstructor
+@Service
+public class CommentServiceImpl implements CommentService {
+
+    private final CommentRepository commentRepository;
+
+    private final BookService bookService;
+
+    private final UserReadService userReadService;
+
+    @Override
+    @Transactional(readOnly = true)
+    public Comment findById(long id) {
+        return commentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Comment with id %d not found".formatted(id)));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Comment> findByBookId(long bookId) {
+        return commentRepository.findByBookIdOrderByCreatedAtDesc(bookId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Comment> findByBookId(long bookId, Pageable page) {
+        return commentRepository.findByBookId(bookId, page);
+    }
+
+    @Override
+    @Transactional
+    public Comment update(long id, String text) {
+        String normalized = normalizeAndValidateText(text);
+
+        var existing = commentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(
+                        "Comment with id %d not found".formatted(id)));
+
+        existing.setText(normalized);
+        return commentRepository.save(existing);
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(long id) {
+        try {
+            commentRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException(
+                    "Comment with id %d not found".formatted(id), e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public Comment insert(long bookId, long authorUserId, String text) {
+        Book book = bookService.findById(bookId);
+        User user = userReadService.getById(authorUserId);
+
+        String normalized = normalizeAndValidateText(text);
+        var comment = new Comment(normalized, book, user);
+        return commentRepository.save(comment);
+    }
+
+    private String normalizeAndValidateText(String text) {
+        if (text == null) {
+            throw new ValidationException("Comment text must not be blank");
+        }
+        var trimmed = text.trim();
+        if (trimmed.isEmpty()) {
+            throw new ValidationException("Comment text must not be blank");
+        }
+        if (trimmed.length() > 2048) {
+            throw new ValidationException("Comment text must be ≤ 2048 characters");
+        }
+        return trimmed;
+    }
+}
+
