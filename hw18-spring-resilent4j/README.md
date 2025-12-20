@@ -25,3 +25,18 @@
 ---
 
 **Данное задание НЕ засчитывает предыдущие!**
+
+
+# Тест:
+
+```bash
+chmod +x run-all.sh 01-smoke.sh 02-resilience.sh 03-actuator.sh lib.sh
+
+BASE_MAIN=http://127.0.0.1:8080 \
+BASE_MOD=http://127.0.0.1:9090 \
+BOOK_ID=1 \
+STEP7_PAR=30 \
+STEP8_SEQ=20 \
+./run-all.sh
+```
+

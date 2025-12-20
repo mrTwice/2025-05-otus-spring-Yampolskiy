@@ -1,0 +1,12 @@
+server:
+  port: 9090
+
+moderation:
+  failure:
+    errorProbability: 0.40
+    slowProbability: 0.40
+    slowDelayMs: 1500
+  rules:
+    forbidden:
+      - "spam"
+      - "mat"
