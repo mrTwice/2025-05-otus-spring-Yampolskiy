@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: coffee-automat
+
+coffee:
+  stock:
+    WATER: 5000
+    COFFEE_BEANS: 1000
+    MILK: 2000
+    SUGAR: 1000
+  low-stock-threshold: 200
+  prices:
+    ESPRESSO: 250
+    AMERICANO: 300
+    CAPPUCCINO: 350
+  recipes:
+    ESPRESSO:
+      seconds: 6
+      grams:
+        WATER: 30
+        COFFEE_BEANS: 18
+    AMERICANO:
+      seconds: 8
+      grams:
+        WATER: 120
+        COFFEE_BEANS: 18
+    CAPPUCCINO:
+      seconds: 10
+      grams:
+        WATER: 30
+        COFFEE_BEANS: 18
+        MILK: 120
+  payment:
+    success-rate-percent: 96
+    provider: "mock"
+  notify:
+    channel: "stdout"
